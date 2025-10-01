@@ -21,4 +21,5 @@ __pycache__/
 /.mypy_cache/
 .dmypy.json
 /venv/
+/.venv/
 .flatpak-builder/
