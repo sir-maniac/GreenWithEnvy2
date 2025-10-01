@@ -14,16 +14,21 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with gst.  If not, see <http://www.gnu.org/licenses/>.
+from ast import Param
 import logging
+import sys
 import threading
 import time
-from typing import List, Dict, Optional, Tuple, Callable, Any
+from typing import List, Dict, Optional, ParamSpec, Tuple, Callable, Any, TypeVar, Union, cast
 
 from Xlib import display
 from Xlib.ext.nvcontrol import Gpu, Cooler
 from injector import singleton, inject
+from numpy import isin
 from py3nvml import py3nvml
-from py3nvml.py3nvml import NVML_CLOCK_SM, NVMLError, NVML_ERROR_NOT_SUPPORTED, NVML_ERROR_UNKNOWN, \
+
+from py3nvml.py3nvml import c_nvmlMemory_t, NVML_CLOCK_GRAPHICS, NVML_CLOCK_MEM, NVML_CLOCK_SM, NVML_CLOCK_VIDEO, \
+    NVMLError, NVML_ERROR_NOT_SUPPORTED, NVML_ERROR_UNKNOWN, \
     NVML_TEMPERATURE_GPU, NVML_TEMPERATURE_THRESHOLD_SLOWDOWN, NVML_TEMPERATURE_THRESHOLD_SHUTDOWN
 
 from gwe.model.clocks import Clocks

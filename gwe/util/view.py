@@ -122,12 +122,6 @@ def get_fan_profile_data(profile: FanProfile) -> Dict[int, int]:
     return data
 
 
-def is_dazzle_version_supported() -> bool:
-    if Gtk.MAJOR_VERSION >= 3 and Gtk.MINOR_VERSION >= 24:  # Mypy says that this check returns Any, not sure why...
-        return True
-    return False
-
-
 def get_default_application() -> Gtk.Application:
     return Gtk.Application.get_default()
 

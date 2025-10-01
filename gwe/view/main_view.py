@@ -46,7 +46,7 @@ except (ImportError, ValueError):
 
 from gwe.di import MainBuilder
 from gwe.view.edit_fan_profile_view import EditFanProfileView
-from gwe.util.view import hide_on_delete, init_plot_chart, get_fan_profile_data, is_dazzle_version_supported
+from gwe.util.view import hide_on_delete, init_plot_chart, get_fan_profile_data
 from gwe.view.edit_overclock_profile_view import EditOverclockProfileView
 from gwe.view.historical_data_view import HistoricalDataView
 from gwe.view.preferences_view import PreferencesView
@@ -167,8 +167,6 @@ class MainView(MainViewInterface):
         self._fan_edit_button: Gtk.Button = self._builder.get_object('fan_edit_button')
         self._overclock_edit_button: Gtk.Button = self._builder.get_object('overclock_edit_button')
         self._init_plot_charts(fan_scrolled_window)
-        if not is_dazzle_version_supported():
-            self._builder.get_object("historical_data_button").set_sensitive(False)
 
     def _init_about_dialog(self) -> None:
         self._about_dialog.set_program_name(APP_NAME)

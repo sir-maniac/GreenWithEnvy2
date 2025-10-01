@@ -14,12 +14,12 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with gst.  If not, see <http://www.gnu.org/licenses/>.
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 
 class Fan:
     def __init__(self,
-                 fan_list: List[Tuple[int, int]] = None,
+                 fan_list: Optional[List[Tuple[int, int]]] = None,
                  control_allowed: bool = False,
                  manual_control: bool = False
                  ) -> None:
