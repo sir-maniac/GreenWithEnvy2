@@ -18,7 +18,7 @@
 # Based on deprecated library 'Dazzle', dzl-graph-column copyrighted by
 #    Christian Hergert
 #
-from typing import Generic, TypeVar
+from typing import Any, Generic, List, Set, TypeVar
 from collections import deque
 
 T = TypeVar('T')
@@ -36,6 +36,11 @@ class GraphColumn(Generic[T]):
 
     def append(self, value: T) -> None:
         self._values.append(value)
+
+    def resize(self, new_max_len: int) -> None:
+        new_values: deque[T] = deque(self._values, maxlen=new_max_len)
+        self._max_len = new_max_len
+        self._values = new_values
 
     def __len__(self) -> int:
         return len(self._values)

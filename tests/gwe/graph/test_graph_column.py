@@ -68,6 +68,23 @@ def test_graph_column_overflow_and_indexing() -> None:
     assert col.get_value(1) == 4
     assert col.get_value(2) == 5
 
+def test_graph_column_resize_smaller() -> None:
+    col = GraphColumn[int]("Resize", 5)
+    col.append(1)
+    col.append(2)
+    col.append(3)
+    col.append(4)
+    col.append(5)
+
+    col.resize(3)
+    # Only last 3 values should remain: [3, 4, 5]
+    assert len(col._values) == 3
+    assert list(col._values) == [3, 4, 5]
+    assert col.get_value(0) == 3
+    assert col.get_value(1) == 4
+    assert col.get_value(2) == 5
+
+
 #
 #  max_value()
 #
