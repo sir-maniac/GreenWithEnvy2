@@ -64,34 +64,6 @@ class GraphStackedRenderer(GraphRenderer):
             last_x = self._calc_x(model_iter, begin_time, timespan, area.width)
             last_y = float(area.height)
 
-            cairo_context.move_to(last_x, area.height)
-
-            while model_iter.next():
-                x = self._calc_x(model_iter, begin_time, timespan, area.width)
-                y = self._calc_y(model_iter, y_begin, y_end, area.height, self._column)
-
-                cairo_context.curve_to(last_x + chunk, last_y, last_x + chunk, y, x, y)
-
-                last_x = x
-                last_y = y
-
-        cairo_context.set_line_width(self._line_width)
-        cairo_context.set_source_rgba(self._stacked_color_rgba.red,
-                                      self._stacked_color_rgba.green,
-                                      self._stacked_color_rgba.blue,
-                                      self._stacked_color_rgba.alpha)
-        cairo_context.rel_line_to(0, area.height)
-        cairo_context.stroke_preserve()
-        cairo_context.close_path()
-        cairo_context.fill()
-
-        model_iter = table.get_iter_first()
-        if model_iter is not None:
-            model_iter.next()
-            chunk = area.width / (table._max_samples - 1) / 2.0
-            last_x = self._calc_x(model_iter, begin_time, timespan, area.width)
-            last_y = float(area.height)
-
             cairo_context.move_to(last_x, last_y)
 
             while model_iter.next():
@@ -103,6 +75,22 @@ class GraphStackedRenderer(GraphRenderer):
                 last_x = x
                 last_y = y
 
+        # save path for stroke color
+        stroke_path = cairo_context.copy_path()
+
+        # background
+        cairo_context.set_line_width(self._line_width)
+        cairo_context.set_source_rgba(self._stacked_color_rgba.red,
+                                      self._stacked_color_rgba.green,
+                                      self._stacked_color_rgba.blue,
+                                      self._stacked_color_rgba.alpha)
+        cairo_context.rel_line_to(0, area.height)
+        cairo_context.stroke_preserve()
+        cairo_context.close_path()
+        cairo_context.fill()
+
+        # foreground line
+        cairo_context.append_path(stroke_path)
         cairo_context.set_source_rgba(self._stroke_color_rgba.red,
                                       self._stroke_color_rgba.green,
                                       self._stroke_color_rgba.blue,
