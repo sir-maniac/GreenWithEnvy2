@@ -21,6 +21,7 @@
 
 from abc import ABCMeta, abstractmethod
 from typing import Optional, override
+import typing
 
 import cairo
 from gi.repository.Gdk import RGBA
@@ -31,10 +32,10 @@ class GraphRenderer(metaclass=ABCMeta):
     @abstractmethod
     def render(self,
                table : GraphModel,
-               x_begin : int,
-               x_end : int,
-               y_begin : float,
-               y_end : float,
+               begin_time : int,
+               end_time : int,
+               y_begin : int,
+               y_end : int,
                cairo_context : cairo.Context,
                area : Gdk.Rectangle) -> None:
         raise NotImplementedError
@@ -58,18 +59,17 @@ class GraphLineRenderer(GraphRenderer):
     def set_stroke_color_rgba(self, stroke_color: RGBA) -> None:
         self._stroke_color = stroke_color
 
-    def get_stroke_color_rgba(self) -> Optional[RGBA]:
+    def get_stroke_color_rgba(self) -> RGBA:
         return self._stroke_color
-
     stroke_color_rgba = property(get_stroke_color_rgba, set_stroke_color_rgba)
 
     @override
     def render(self,
                table : GraphModel,
-               x_begin : int,
-               x_end : int,
-               y_begin : float,
-               y_end : float,
+               begin_time : int,
+               end_time : int,
+               y_begin : int,
+               y_end : int,
                cairo_context : cairo.Context,
                area : Gdk.Rectangle) -> None:
         cairo_context.save()
@@ -82,14 +82,15 @@ class GraphLineRenderer(GraphRenderer):
             max_samples = table.max_samples
 
             chunk = area.width / float( max_samples - 1 ) / 2.0
+            timespan = float(end_time - begin_time)
 
-            last_x = self._calc_x(model_iter, x_begin, x_end, area.width)
+            last_x = self._calc_x(model_iter, begin_time, timespan, area.width)
             last_y = self._calc_y(model_iter, y_begin, y_end, area.height, self._column)
 
             cairo_context.move_to(last_x, last_y)
 
             while model_iter.next():
-                x = self._calc_x(model_iter, x_begin, x_end, area.width)
+                x = self._calc_x(model_iter, begin_time, timespan, area.width)
                 y = self._calc_y(model_iter, y_begin, y_end, area.height, self._column)
 
                 cairo_context.curve_to(
@@ -114,10 +115,10 @@ class GraphLineRenderer(GraphRenderer):
 
 
     @staticmethod
-    def _calc_x(model_iter: GraphModelIter, begin: float, end: int, width: int) -> float:
+    def _calc_x(model_iter: GraphModelIter, begin: float, timespan: float, width: int) -> float:
         timestamp: int = model_iter.timestamp
         assert timestamp != 0
-        return (timestamp - begin) / float(end - begin) * width
+        return (timestamp - begin) / float(timespan) * width
 
     @staticmethod
     def _calc_y(model_iter: GraphModelIter,

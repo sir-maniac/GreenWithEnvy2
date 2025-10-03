@@ -48,25 +48,26 @@ class GraphStackedRenderer(GraphRenderer):
     @override
     def render(self,
                   table: GraphModel,
-                  x_begin: int,
-                  x_end: int,
+                  begin_time: int,
+                  end_time: int,
                   y_begin: float,
                   y_end: float,
                   cairo_context: cairo.Context,
                   area: Gdk.Rectangle) -> None:
         cairo_context.save()
 
+        timespan = float(end_time - begin_time)
         model_iter: Optional[GraphModelIter] = table.get_iter_first()
         if model_iter is not None:
             model_iter.next()
             chunk = area.width / (table.max_samples - 1) / 2.0
-            last_x = self._calc_x(model_iter, x_begin, x_end, area.width)
+            last_x = self._calc_x(model_iter, begin_time, timespan, area.width)
             last_y = float(area.height)
 
             cairo_context.move_to(last_x, area.height)
 
             while model_iter.next():
-                x = self._calc_x(model_iter, x_begin, x_end, area.width)
+                x = self._calc_x(model_iter, begin_time, timespan, area.width)
                 y = self._calc_y(model_iter, y_begin, y_end, area.height, self._column)
 
                 cairo_context.curve_to(last_x + chunk, last_y, last_x + chunk, y, x, y)
@@ -88,13 +89,13 @@ class GraphStackedRenderer(GraphRenderer):
         if model_iter is not None:
             model_iter.next()
             chunk = area.width / (table._max_samples - 1) / 2.0
-            last_x = self._calc_x(model_iter, x_begin, x_end, area.width)
+            last_x = self._calc_x(model_iter, begin_time, timespan, area.width)
             last_y = float(area.height)
 
             cairo_context.move_to(last_x, last_y)
 
             while model_iter.next():
-                x = self._calc_x(model_iter, x_begin, x_end, area.width)
+                x = self._calc_x(model_iter, begin_time, timespan, area.width)
                 y = self._calc_y(model_iter, y_begin, y_end, area.height, self._column)
 
                 cairo_context.curve_to(last_x + chunk, last_y, last_x + chunk, y, x, y)
@@ -110,9 +111,9 @@ class GraphStackedRenderer(GraphRenderer):
         cairo_context.restore()
 
     @staticmethod
-    def _calc_x(model_iter: GraphModelIter, begin: float, end: int, width: int) -> float:
+    def _calc_x(model_iter: GraphModelIter, begin: int, timespan: float, width: int) -> float:
         timestamp: int = model_iter.timestamp
-        return (timestamp - begin) / (end - begin) * width
+        return (timestamp - begin) / timespan * width
 
     @staticmethod
     def _calc_y(model_iter: GraphModelIter,
