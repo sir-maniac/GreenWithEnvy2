@@ -20,7 +20,7 @@
 #
 
 from hmac import new
-from typing import Any, List, Optional
+from typing import Any, List, Optional, cast
 import cairo
 from gi.repository import GObject, Gdk, Gtk, GLib
 from gi.repository.GLib import SOURCE_CONTINUE, SOURCE_REMOVE
@@ -38,7 +38,7 @@ class GraphView(Gtk.DrawingArea):
         self._tick_handler: int = 0
         self._renderers: List[GraphRenderer] = []
         self._missed_count: int = 0
-        self._surface: Optional[cairo.Surface] = None
+        self._surface: Optional[cairo.XlibSurface] = None
         self._x_offset: float = 0.0
 
         # Connect signals
@@ -46,6 +46,7 @@ class GraphView(Gtk.DrawingArea):
         table.connect("notify::value-min", type(self)._on_notify_value_min_max, self)
         table.connect("notify::timespan", type(self)._on_notify_timespan, self)
         table.connect("changed", type(self)._on_model_changed, self)
+
 
         self.connect("draw", type(self)._on_draw)
         self.connect("size-allocate", type(self)._on_size_allocate)
@@ -93,6 +94,7 @@ class GraphView(Gtk.DrawingArea):
         if allocation.width != old_alloc.width or allocation.height != old_alloc.height:
             self._surface = None  # Will be recreated on next draw
             self._clear_surface()
+            self.queue_draw()
 
     def _on_draw(self, cr: cairo.Context) -> bool:
         self._missed_count = 0
@@ -106,7 +108,7 @@ class GraphView(Gtk.DrawingArea):
         style_context.restore()
         # Draw the graph surface
         cr.save()
-        if self._surface:
+        if self._surface is not None:
             cr.set_source_surface(self._surface, self._x_offset * alloc.width, 0)
             cr.rectangle(0, 0, alloc.width, alloc.height)
             cr.fill()
@@ -121,14 +123,14 @@ class GraphView(Gtk.DrawingArea):
 
     def _ensure_surface(self) -> None:
         alloc = self.get_allocation()
-        if self._surface is None:
+        if self._surface is None or self._surface.get_width() != alloc.width or self._surface.get_height() != alloc.height:
             self._surface_dirty = True
             window = self.get_window()
             assert window is not None
-            self._surface = window.create_similar_surface(
+            self._surface = cast( cairo.XlibSurface, window.create_similar_surface(
                 cairo.CONTENT_COLOR_ALPHA,
                 alloc.width,
-                alloc.height)
+                alloc.height) )
         if self._model is None:
             return
         if self._surface_dirty:
