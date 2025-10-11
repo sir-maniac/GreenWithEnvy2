@@ -58,7 +58,7 @@ class NvidiaRepository:
 
     @staticmethod
     def is_nvidia_smi_available() -> bool:
-        return run_and_get_stdout(['which', _NVIDIA_SMI_BINARY_NAME])[0] == 0
+        return cast(bool, run_and_get_stdout(['which', _NVIDIA_SMI_BINARY_NAME])[0] == 0)
 
     def set_ctrl_display(self, ctrl_display: str) -> None:
         self._ctrl_display = ctrl_display
@@ -89,6 +89,16 @@ class NvidiaRepository:
             _LOG.exception("Error while checking NVML Shared Library")
         return False
 
+    @staticmethod
+    def _get_item(dict: Optional[Dict[str, str | int]] , key: str) -> Optional[int]:
+        if dict is None:
+            return None
+        v = dict.get(key)
+        if v is None:
+            return None
+        assert isinstance(v, int)
+        return v
+
     @synchronized_with_attr("_lock")
     def get_status(self) -> Optional[Status]:
         xlib_display = None
@@ -102,9 +112,10 @@ class NvidiaRepository:
                 gpu = Gpu(gpu_index)
                 uuid = xlib_display.nvcontrol_get_gpu_uuid(gpu)
                 handle = py3nvml.nvmlDeviceGetHandleByUUID(uuid.encode('utf-8'))
-                memory_total = None
-                memory_used = None
+                memory_total: Optional[int] = None
+                memory_used: Optional[int] = None
                 mem_info = self._nvml_get_val(py3nvml.nvmlDeviceGetMemoryInfo, handle)
+                assert isinstance(mem_info, c_nvmlMemory_t)
                 if mem_info is not None:
                     memory_used = mem_info.used // 1024 // 1024
                     memory_total = mem_info.total // 1024 // 1024
@@ -131,25 +142,26 @@ class NvidiaRepository:
                 power = self._get_power_from_py3nvml(handle)
                 temp = self._get_temp_from_py3nvml(handle)
 
-                perf_modes = xlib_display.nvcontrol_get_performance_modes(gpu)
+                perf_modes: List[Dict[str, str | int]] = xlib_display.nvcontrol_get_performance_modes(gpu)
                 perf_mode = next((p for p in perf_modes if p['perf'] == len(perf_modes) - 1), None)
-                clock_info = xlib_display.nvcontrol_get_clock_info(gpu)
+                clock_info: Dict[str, str | int] = xlib_display.nvcontrol_get_clock_info(gpu)
                 if perf_mode:
                     clocks = Clocks(
-                        graphic_current=clock_info.get('nvclock') if clock_info is not None else None,
-                        graphic_max=perf_mode.get('nvclockmax') if perf_mode is not None else None,
+                        graphic_current=self._get_item(clock_info, 'nvclock'),
+                        graphic_max=self._get_item(perf_mode, 'nvclockmax'),
                         sm_current=self._nvml_get_val(py3nvml.nvmlDeviceGetClockInfo, handle, NVML_CLOCK_SM),
                         sm_max=self._nvml_get_val(py3nvml.nvmlDeviceGetMaxClockInfo, handle, NVML_CLOCK_SM),
-                        memory_current=clock_info.get('memclock') if clock_info is not None else None,
-                        memory_max=perf_mode.get('memclockmax') if perf_mode is not None else None,
-                        video_current=self._nvml_get_val(py3nvml.nvmlDeviceGetClockInfo, handle, 3),  # Missing
-                        video_max=self._nvml_get_val(py3nvml.nvmlDeviceGetMaxClockInfo, handle, 3)  # Missing
+                        memory_current=self._get_item(clock_info, 'memclock'),
+                        memory_max=self._get_item(perf_mode, 'memclockmax'),
+                        video_current=self._nvml_get_val(py3nvml.nvmlDeviceGetClockInfo, handle, NVML_CLOCK_VIDEO),
+                        video_max=self._nvml_get_val(py3nvml.nvmlDeviceGetMaxClockInfo, handle, NVML_CLOCK_VIDEO)
                     )
                 else:
                     clocks = Clocks()
 
                 perf_level_max = perf_mode.get('perf') if perf_mode else None
-                mem_transfer_rate_offset_range = \
+                assert perf_level_max is None or isinstance(perf_level_max, int)
+                mem_transfer_rate_offset_range: Optional[Tuple[int, int]] = \
                     xlib_display.nvcontrol_get_mem_transfer_rate_offset_range(gpu, perf_level_max)
                 if mem_transfer_rate_offset_range is not None:
                     mem_clock_offset_range = (mem_transfer_rate_offset_range[0] // 2,
@@ -167,7 +179,7 @@ class NvidiaRepository:
                         perf_level_max=perf_level_max
                     )
                 else:
-                    overclock = Overclock(perf_level_max=perf_mode.get('perf') if perf_mode else None)
+                    overclock = Overclock(perf_level_max=self._get_item(perf_mode, 'perf'))
 
                 manual_control = xlib_display.nvcontrol_get_cooler_manual_control_enabled(gpu)
                 fan_list: Optional[List[Tuple[int, int]]] = None
@@ -176,8 +188,8 @@ class NvidiaRepository:
                     fan_list = []
                     for i in fan_indexes:
                         fan = Cooler(i)
-                        duty = xlib_display.nvcontrol_get_fan_duty(fan)
-                        rpm = xlib_display.nvcontrol_get_fan_rpm(fan)
+                        duty: Optional[int] = xlib_display.nvcontrol_get_fan_duty(fan)
+                        rpm: Optional[int] = xlib_display.nvcontrol_get_fan_rpm(fan)
                         if duty is not None and rpm is not None:
                             fan_list.append((duty, rpm))
                 fan = Fan(
@@ -241,7 +253,7 @@ class NvidiaRepository:
                str(limit)]
         result = run_and_get_stdout(cmd)
         _LOG.info(f"Exit code: {result[0]}. {result[1]}\n{result[2]}")
-        return result[0] == 0
+        return cast(bool, result[0] == 0)
 
     def set_all_gpus_fan_to_auto(self) -> None:
         for gpu_index in range(self._gpu_count):
@@ -263,10 +275,24 @@ class NvidiaRepository:
         xlib_display.close()
         return error
 
+    T = TypeVar('T')
+    P = ParamSpec('P')
     @staticmethod
-    def _nvml_get_val(a_function: Callable, *args: Any) -> Any:
+    def _nvml_get_val(a_function: Callable[P, Union[str, T]],
+                      /,
+                      *args: P.args,
+                      **kwargs: P.kwargs) -> Optional[T]:
         try:
-            return a_function(*args)
+            # manage the peculiarity of all py3nvml functions returning a
+            # possible string, even if the original function doesn't
+            #
+            # For the type checker, I can remove the `str` type from the
+            #  return type by specifying it in the Callable[] definition
+            #  because unions are flattened when nested
+
+            # I don't know why MyPy says cast() is returning Any
+            return cast(Optional[NvidiaRepository.T], a_function(*args, **kwargs))
+
         except NVMLError as err:
             if err.value == NVML_ERROR_NOT_SUPPORTED:
                 _LOG.debug(f"Function {a_function.__name__} not supported")
@@ -292,8 +318,8 @@ class NvidiaRepository:
         )
 
     @staticmethod
-    def _convert_milliwatt_to_watt(milliwatt: Optional[int]) -> Optional[float]:
-        return None if milliwatt is None else milliwatt / 1000
+    def _convert_milliwatt_to_watt(milliwatt: Optional[int|str]) -> Optional[float]:
+        return None if milliwatt is None else int(milliwatt) / 1000
 
     def _get_temp_from_py3nvml(self, handle: Any) -> Temp:
         return Temp(
