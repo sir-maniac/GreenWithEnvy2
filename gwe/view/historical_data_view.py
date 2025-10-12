@@ -26,7 +26,7 @@ from injector import singleton, inject
 from gwe.conf import GRAPH_COLOR_HEX
 from gwe.di import HistoricalDataBuilder
 from gwe.model.clocks import Clocks
-from gwe.presenter.historical_data_presenter import GraphData, HistoricalDataViewInterface, HistoricalDataPresenter, MONITORING_INTERVAL, \
+from gwe.presenter.historical_data_presenter import GRAPH_INIT, HistoricalDataViewInterface, HistoricalDataPresenter, MONITORING_INTERVAL, \
     GraphType
 from gwe.graph.graph_model import GraphModel
 from gwe.graph.graph_view import GraphView
@@ -37,7 +37,7 @@ _LOG = logging.getLogger(__name__)
 
 GV_MIN_VALUE = 0
 GV_MAX_VALUE = 1
-GV_MAX_AXIS = 2
+GV_CUR_VALUE = 2
 
 @singleton
 class HistoricalDataView(HistoricalDataViewInterface):
@@ -45,12 +45,14 @@ class HistoricalDataView(HistoricalDataViewInterface):
     def __init__(self,
                  presenter: HistoricalDataPresenter,
                  builder: HistoricalDataBuilder,
+                 nvidia_repository: NvidiaRepository,
                  ) -> None:
         _LOG.debug('init HistoricalDataView')
         self._presenter: HistoricalDataPresenter = presenter
         self._presenter.view = self
         self._builder: Gtk.Builder = builder
         self._builder.connect_signals(self._presenter)
+        self._nvidia_repository = nvidia_repository
         self._graphs: Dict[GraphType, Dict[str, Any]] = {}
         self._init_widgets()
 
@@ -65,21 +67,49 @@ class HistoricalDataView(HistoricalDataViewInterface):
     def _init_graphs(self) -> None:
         self._graph_views: Dict[GraphType, Tuple[Gtk.Label, Gtk.Label, Gtk.Label]] = {}
         self._graph_models: Dict[GraphType, GraphModel] = {}
+
+        mem_total: int
+        max_clocks: Clocks
+        mem_total, max_clocks = self._nvidia_repository.get_max_values()
+
         for graph_type in GraphType:
             self._graph_container: Gtk.Frame = self._builder.get_object(f'graph_container_{graph_type.value}')
             self._graph_views[graph_type] = (self._builder.get_object(f'graph_min_value_{graph_type.value}'),
                                                 self._builder.get_object(f'graph_max_value_{graph_type.value}'),
                                                 self._builder.get_object(f'graph_max_axis_{graph_type.value}'))
 
-            timespan: int = MONITORING_INTERVAL * 1000 * 1000
             max_samples: float = int( MONITORING_INTERVAL / self._presenter.get_refresh_interval() + 1 )
+            timespan: int = MONITORING_INTERVAL * 1000 * 1000
+            init = GRAPH_INIT[graph_type]
+
+            max_value: float
+            if graph_type is GraphType.GPU_CLOCK:
+                max_value = max_clocks.graphic_max if max_clocks.graphic_max is not None else init.max_value
+            elif graph_type is GraphType.MEMORY_CLOCK:
+                max_value = max_clocks.memory_max if max_clocks.memory_max is not None else init.max_value
+            elif graph_type is GraphType.MEMORY_USAGE:
+                max_value = mem_total
+            else:
+                max_value = init.max_value
+
             graph_model = GraphModel(
                 column_names=["Col0"],
                 max_samples=max_samples,
                 timespan=timespan,
-                value_min=0.0,
-                value_max=100.0
+                value_min=init.min_value,
+                value_max=max_value
             )
+
+            self._graph_views[graph_type][GV_MAX_VALUE].set_text(f"{max_value:.0f}")
+            self._graph_views[graph_type][GV_MIN_VALUE].set_text(f"{init.min_value:.0f}")
+            self._graph_views[graph_type][GV_CUR_VALUE].set_text(f"0 {init.unit}")
+
+            graph_model.connect("notify::value-max",
+                                type(self)._on_notify_max,
+                                self._graph_views[graph_type][GV_MAX_VALUE])
+            graph_model.connect("notify::value-min",
+                                type(self)._on_notify_min,
+                                self._graph_views[graph_type][GV_MIN_VALUE])
 
             graph_view = GraphView(graph_model)
             graph_renderer = GraphStackedRenderer()
@@ -102,22 +132,26 @@ class HistoricalDataView(HistoricalDataViewInterface):
 
             self._graph_models[graph_type] = graph_model
 
+    @staticmethod
+    def _on_notify_min(model: GraphModel, _pspec: GObject.ParamSpec, label: Gtk.Label) -> None:
+        label.set_text(f"{model.value_min:.0f}")
+
+    @staticmethod
+    def _on_notify_max(model: GraphModel, _pspec: GObject.ParamSpec, label: Gtk.Label) -> None:
+        label.set_text(f"{model.value_max:.0f}")
+
     def reset_graphs(self) -> None:
         self._init_graphs()
 
-    @override
-    def refresh_graphs(self, data_dict: Dict[GraphType, GraphData]) -> None:
+    def refresh_graphs(self, data_dict: Dict[GraphType, Tuple[int, float]]) -> None:
         time1 = time.time()
         for graph_type, data in data_dict.items():
+            unit = GRAPH_INIT[graph_type].unit
+            self._graph_views[graph_type][GV_CUR_VALUE].set_text(f"{data[1]} {unit}")
+
             model = self._graph_models[graph_type]
-            graph_view = self._graph_views[graph_type]
+            model.append(data[0], data[1])
 
-            model.append(data.timestamp, data.value)
-            graph_view[GV_MAX_AXIS].set_text(f"{data.value:.0f} {data.unit}")
-
-            if self._dialog.props.visible:
-                graph_view[GV_MIN_VALUE].set_text(f"{model.value_min:.0f}")
-                graph_view[GV_MAX_VALUE].set_text(str=f"{model.value_max:.0f}")
         time2 = time.time()
         _LOG.debug(f'Refresh graph took {((time2 - time1) * 1000.0):.3f} ms')
 

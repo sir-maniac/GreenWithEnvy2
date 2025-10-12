@@ -46,6 +46,9 @@ _LOG = logging.getLogger(__name__)
 _NVIDIA_SMI_BINARY_NAME = 'nvidia-smi'
 _NVIDIA_SETTINGS_BINARY_NAME = 'nvidia-settings'
 
+DEFAULT_MAX_MEMORY = 4069
+DEFAULT_MAX_GPU_CLOCK = 2000
+DEFAULT_MAX_MEM_CLOCK = 7000
 
 @singleton
 class NvidiaRepository:
@@ -100,6 +103,50 @@ class NvidiaRepository:
         return v
 
     @synchronized_with_attr("_lock")
+    def get_max_values(self) -> Tuple[int,Clocks]:
+        py3nvml.nvmlInit()
+        xlib_display = display.Display(self._ctrl_display)
+        gpu_count = xlib_display.nvcontrol_get_gpu_count()
+
+        mem_total: int = DEFAULT_MAX_MEMORY
+        mem_clock_max: int = DEFAULT_MAX_MEM_CLOCK
+        graphic_max: int = DEFAULT_MAX_GPU_CLOCK
+        sm_max: int = 0
+        video_max: int= 0
+
+        for gpu_index in range(gpu_count):
+            gpu = Gpu(gpu_index)
+            uuid: Optional[str] = xlib_display.nvcontrol_get_gpu_uuid(gpu)
+            assert uuid is not None
+            handle = py3nvml.nvmlDeviceGetHandleByUUID(uuid.encode('utf-8'))
+            mem_info = self._nvml_get_val(py3nvml.nvmlDeviceGetMemoryInfo,  handle)
+            if mem_info is not None:
+                mem_total = max(mem_total, mem_info.total // 1024 // 1024)
+
+            perf_modes: List[Dict[str,str|int]] = xlib_display.nvcontrol_get_performance_modes(gpu)
+            perf_mode = next((p for p in perf_modes if p['perf'] == len(perf_modes) - 1), None)
+            g_max = perf_mode.get('nvclockmax') if perf_mode is not None else None
+            if g_max is not None:
+                assert isinstance(g_max, int)
+                graphic_max = max(graphic_max, g_max)
+
+            sm = self._nvml_get_val(py3nvml.nvmlDeviceGetMaxClockInfo, handle, NVML_CLOCK_SM)
+            if sm is not None:
+                sm_max = max(sm_max, sm)
+            mem_clk = self._nvml_get_val(py3nvml.nvmlDeviceGetMaxClockInfo, handle, NVML_CLOCK_MEM)
+            if mem_clk is not None:
+                mem_clock_max = max(mem_clock_max, mem_clk)
+            v_max = self._nvml_get_val(py3nvml.nvmlDeviceGetMaxClockInfo, handle, NVML_CLOCK_VIDEO)
+            if v_max is not None:
+                video_max = max(video_max, v_max)
+
+        return (mem_total,
+                Clocks(graphic_max=graphic_max,
+                       sm_max=sm_max,
+                       memory_max=mem_clock_max,
+                       video_max=video_max))
+
+    @synchronized_with_attr("_lock")
     def get_status(self) -> Optional[Status]:
         xlib_display = None
         try:
@@ -145,6 +192,7 @@ class NvidiaRepository:
                 perf_modes: List[Dict[str, str | int]] = xlib_display.nvcontrol_get_performance_modes(gpu)
                 perf_mode = next((p for p in perf_modes if p['perf'] == len(perf_modes) - 1), None)
                 clock_info: Dict[str, str | int] = xlib_display.nvcontrol_get_clock_info(gpu)
+
                 if perf_mode:
                     clocks = Clocks(
                         graphic_current=self._get_item(clock_info, 'nvclock'),
@@ -305,6 +353,7 @@ class NvidiaRepository:
 
     def _get_power_from_py3nvml(self, handle: Any) -> Power:
         power_con = self._nvml_get_val(py3nvml.nvmlDeviceGetPowerManagementLimitConstraints, handle)
+
         return Power(
             draw=self._convert_milliwatt_to_watt(self._nvml_get_val(py3nvml.nvmlDeviceGetPowerUsage, handle)),
             limit=self._convert_milliwatt_to_watt(
