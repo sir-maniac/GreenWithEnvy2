@@ -139,9 +139,9 @@ git clone --recurse-submodules -j4 https://github.com/sir-maniac/GreenWithEnvy2.
 cd gwe
 git checkout master
 sudo -H pip3 install -r requirements.txt
-meson . build --prefix /usr
-ninja -v -C build
-sudo ninja -v -C build install
+meson setup . build --prefix /usr/local
+meson compile -C build
+sudo meson install -C build
 ```
 
 #### Update old installation
@@ -154,9 +154,9 @@ git reset --hard origin/master
 git submodule init
 git submodule update
 sudo -H pip3 install -r requirements.txt
-meson . build --prefix /usr
-ninja -v -C build
-sudo ninja -v -C build install
+meson setup . build --prefix /usr/local
+meson compile -C build
+sudo meson install -C build
 ```
 
 #### Run

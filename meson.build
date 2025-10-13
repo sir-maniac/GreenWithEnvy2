@@ -9,29 +9,29 @@ project('gwe',
 )
 # project version is defined in gwe/conf.py
 
+conf_py = files('gwe/conf.py')
+
 # Importing modules
 # i18n = import('i18n')
-python3 = import('python3')
-python = import('python3')
-
-prefix = get_option('prefix')
-PKGDATA_DIR = prefix / get_option('datadir') / meson.project_name()
-DATA_DIR = PKGDATA_DIR
-PYTHON_DIR = prefix / python.sysconfig_path('purelib')
-
-message('Looking for dependencies')
-python_bin = python.find_python()
-if not python_bin.found()
-    error('No valid python3 binary found')
+python = import('python')
+py_installation = python.find_installation('python3')
+if not py_installation.found()
+    error('No valid python3 installation found')
 else
-    message('Found python3 binary')
+    message('Found python3 installation')
 endif
+
+message('Python binary: ', py_installation.full_path())
+message('Package install path: ', py_installation.get_install_dir())
+
+find_result = run_command('find', 'gwe', '!', '-type', 'd', check: true)
+sources = find_result.stdout().strip().split('\n')
 
 # Dependencies
 dependency('gobject-introspection-1.0', version: '>= 1.56.0')
 
-install_subdir('gwe', install_dir: PYTHON_DIR)
-install_subdir('python-xlib/Xlib', install_dir: PYTHON_DIR / 'gwe')
+py_installation.install_sources(sources, preserve_path: true)
+
 subdir('data')
 subdir('bin')
 

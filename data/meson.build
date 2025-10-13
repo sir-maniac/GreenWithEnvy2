@@ -1,9 +1,14 @@
 gnome = import('gnome')
 
-app_id = 'com.leinardi.gwe'
+app_id = run_command(
+    'grep',
+    'APP_ID =',
+    conf_py,
+    check: true
+  ).stdout().split(' = ')[1].strip().replace('"', '')
 
 desktop_conf = configuration_data()
-desktop_conf.set('bindir', prefix / get_option('bindir'))
+desktop_conf.set('bindir', get_option('prefix') / get_option('bindir'))
 
 desktop_file = configure_file(
   input: app_id + '.desktop.in',
@@ -15,12 +20,6 @@ desktop_file = configure_file(
 )
 
 message('Looking for dependencies')
-python_bin = python.find_python()
-if not python_bin.found()
-    error('No valid python3 binary found')
-else
-    message('Found python3 binary')
-endif
 
 
 # TODO: Requires GLib 2.52 because of Meson issue
@@ -29,7 +28,7 @@ endif
 #  output: app_id + '.service.desktop',
 #  configuration: desktop_conf,
 #  install: true,
-#  install_dir: PKGDATA_DIR,
+#  install_dir: get_option('datadir') / meson.project_name(),
 #)
 
 # i18n.merge_file(
@@ -50,7 +49,7 @@ endif
 # )
 
 dbus_conf = configuration_data()
-dbus_conf.set('bindir', prefix / get_option('bindir'))
+dbus_conf.set('bindir', get_option('prefix') / get_option('bindir'))
 
 configure_file(
   input: app_id + '.service.in',
@@ -85,6 +84,7 @@ install_data('icons/com.leinardi.gwe-symbolic.svg',
 )
 
 contributors = '\n'.join([
+  'Ryan Bloomfield (sir-maniac)',
   'Roberto Leinardi (leinardi) &lt;roberto@leinardi.com&gt;',
   'Gabriele Musco (gabmus) &lt;emaildigabry@gmail.com&gt;'
 ])
@@ -95,12 +95,12 @@ bindir = get_option('prefix') / get_option('bindir')
 
 glade_conf = configuration_data()
 glade_conf.set('PACKAGE_URL', 'https://github.com/sir-maniac/GreenWithEnvy2/issues')
-glade_conf.set('DATA_DIR', DATA_DIR)
+glade_conf.set('DATA_DIR', get_option('prefix') / get_option('datadir') / meson.project_name())
 glade_conf.set('EXTENSION_DIR', EXTENSION_DIR)
 glade_conf.set('LOCALE_DIR', get_option('prefix') / get_option('datadir') / 'locale')
-glade_conf.set('PYTHON_DIR', PYTHON_DIR)
-glade_conf.set('PYTHON_EXEC_DIR', get_option('prefix') / python.sysconfig_path('stdlib'))
-glade_conf.set('PYTHON', python_bin.path())
+glade_conf.set('PYTHON_DIR', py_installation.get_install_dir())
+#glade_conf.set('PYTHON_EXEC_DIR', get_option('prefix') / python.sysconfig_path('stdlib'))
+glade_conf.set('PYTHON', py_installation.full_path())
 glade_conf.set('APPID', app_id)
 glade_conf.set('libexecdir', LIBEXEC_DIR)
 # this is for development version # glade_conf.set('VERSION', ''.join([run_command(['git', 'describe', '--long', '--tags']).stdout(), get_option('profile')]))
@@ -111,7 +111,7 @@ gwe_resources = gnome.compile_resources(app_id,
   app_id + '.gresource.xml',
   gresource_bundle: true,
   install: true,
-  install_dir: PKGDATA_DIR
+  install_dir: get_option('datadir') / meson.project_name()
 )
 
 gwe_settings = gnome.compile_schemas()
