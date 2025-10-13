@@ -14,9 +14,9 @@ python3 = import('python3')
 python = import('python3')
 
 prefix = get_option('prefix')
-PKGDATA_DIR = join_paths(prefix, get_option('datadir'), meson.project_name())
+PKGDATA_DIR = prefix / get_option('datadir') / meson.project_name()
 DATA_DIR = PKGDATA_DIR
-PYTHON_DIR = join_paths(prefix, python.sysconfig_path('purelib'))
+PYTHON_DIR = prefix / python.sysconfig_path('purelib')
 
 message('Looking for dependencies')
 python_bin = python.find_python()
@@ -30,7 +30,7 @@ endif
 dependency('gobject-introspection-1.0', version: '>= 1.56.0')
 
 install_subdir('gwe', install_dir: PYTHON_DIR)
-install_subdir('python-xlib/Xlib', install_dir: join_paths(PYTHON_DIR, 'gwe'))
+install_subdir('python-xlib/Xlib', install_dir: PYTHON_DIR / 'gwe')
 subdir('data')
 subdir('bin')
 

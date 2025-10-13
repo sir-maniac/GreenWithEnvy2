@@ -3,14 +3,14 @@ gnome = import('gnome')
 app_id = 'com.leinardi.gwe'
 
 desktop_conf = configuration_data()
-desktop_conf.set('bindir', join_paths(prefix, get_option('bindir')))
+desktop_conf.set('bindir', prefix / get_option('bindir'))
 
 desktop_file = configure_file(
   input: app_id + '.desktop.in',
   output: app_id + '.desktop',
   #type: 'desktop',
   install: true,
-  install_dir: join_paths(get_option('datadir'), 'applications'),
+  install_dir: get_option('datadir') / 'applications',
   configuration: desktop_conf
 )
 
@@ -38,7 +38,7 @@ endif
 #   type: 'desktop',
 #   po_dir: '../po',
 #   install: true,
-#   install_dir: join_paths(get_option('datadir'), 'applications')
+#   install_dir: get_option('datadir') / 'applications'
 # )
 #
 # i18n.merge_file(
@@ -46,22 +46,22 @@ endif
 #   output: app_id + '.appdata.xml',
 #   po_dir: '../po',
 #   install: true,
-#   install_dir: join_paths(get_option('datadir'), 'appdata')
+#   install_dir: get_option('datadir') / 'appdata'
 # )
 
 dbus_conf = configuration_data()
-dbus_conf.set('bindir', join_paths(prefix, get_option('bindir')))
+dbus_conf.set('bindir', prefix / get_option('bindir'))
 
 configure_file(
   input: app_id + '.service.in',
   output: app_id + '.service',
   configuration: dbus_conf,
   install: true,
-  install_dir: join_paths(get_option('datadir'), 'dbus-1/services')
+  install_dir: get_option('datadir') / 'dbus-1/services'
 )
 
 install_data(app_id + '.gschema.xml',
-  install_dir: join_paths(get_option('datadir'), 'glib-2.0/schemas')
+  install_dir: get_option('datadir') / 'glib-2.0/schemas'
 )
 
 if false
@@ -77,11 +77,11 @@ if false
   endforeach
 endif
 
-icondir = join_paths(get_option('datadir'), 'icons')
+icondir = get_option('datadir') / 'icons'
 install_subdir('icons/hicolor', install_dir: icondir)
 
 install_data('icons/com.leinardi.gwe-symbolic.svg',
-  install_dir: join_paths(icondir, 'hicolor/symbolic/apps')
+  install_dir: icondir / 'hicolor/symbolic/apps'
 )
 
 contributors = '\n'.join([
@@ -89,17 +89,17 @@ contributors = '\n'.join([
   'Gabriele Musco (gabmus) &lt;emaildigabry@gmail.com&gt;'
 ])
 
-LIBEXEC_DIR = join_paths(get_option('prefix'), get_option('libexecdir'))
-EXTENSION_DIR = join_paths(get_option('prefix'), get_option('libdir'), meson.project_name())
-bindir = join_paths(get_option('prefix'), get_option('bindir'))
+LIBEXEC_DIR = get_option('prefix') / get_option('libexecdir')
+EXTENSION_DIR = get_option('prefix') / get_option('libdir') / meson.project_name()
+bindir = get_option('prefix') / get_option('bindir')
 
 glade_conf = configuration_data()
 glade_conf.set('PACKAGE_URL', 'https://github.com/sir-maniac/GreenWithEnvy2/issues')
 glade_conf.set('DATA_DIR', DATA_DIR)
 glade_conf.set('EXTENSION_DIR', EXTENSION_DIR)
-glade_conf.set('LOCALE_DIR', join_paths(get_option('prefix'), get_option('datadir'), 'locale'))
+glade_conf.set('LOCALE_DIR', get_option('prefix') / get_option('datadir') / 'locale')
 glade_conf.set('PYTHON_DIR', PYTHON_DIR)
-glade_conf.set('PYTHON_EXEC_DIR', join_paths(get_option('prefix'), python.sysconfig_path('stdlib')))
+glade_conf.set('PYTHON_EXEC_DIR', get_option('prefix') / python.sysconfig_path('stdlib'))
 glade_conf.set('PYTHON', python_bin.path())
 glade_conf.set('APPID', app_id)
 glade_conf.set('libexecdir', LIBEXEC_DIR)
@@ -118,5 +118,5 @@ gwe_settings = gnome.compile_schemas()
 
 install_data(
   app_id + '.appdata.xml',
-  install_dir: join_paths(get_option('datadir'), 'metainfo')
+  install_dir: get_option('datadir') / 'metainfo'
 )
