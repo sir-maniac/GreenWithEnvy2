@@ -9,7 +9,7 @@ Forked from https://gitlab.com/leinardi/gwe. This fork is in it's initial stages
 
 I don't have a lot of time, so feel free to fork and release if you feel you have more time to devote to this project.
 
-> **Note:** As this is a new fork, the infomration below may not be up-to-date, as it is copied from the original project.
+> **Note:** As this is a new fork, the information below may not be up-to-date, as it is copied from the original project.
 
 ## 💡 Features
 <img src="/data/icons/hicolor/48x48@2x/apps/com.leinardi.gwe.png" width="96" align="right" hspace="0" />
@@ -135,9 +135,9 @@ Then we have to use `sudo pip3 uninstall matplotlib` and then `sudo apt reinstal
 #### Clone project and install
 If you have not installed GWE yet:
 ```bash
-git clone --recurse-submodules -j4 https://gitlab.com/leinardi/gwe.git
+git clone --recurse-submodules -j4 https://github.com/sir-maniac/GreenWithEnvy2.git
 cd gwe
-git checkout release
+git checkout master
 sudo -H pip3 install -r requirements.txt
 meson . build --prefix /usr
 ninja -v -C build
@@ -149,8 +149,8 @@ If you installed GWE from source code previously and you want to update it:
 ```bash
 cd gwe
 git fetch
-git checkout release
-git reset --hard origin/release
+git checkout master
+git reset --hard origin/master
 git submodule init
 git submodule update
 sudo -H pip3 install -r requirements.txt
@@ -234,7 +234,7 @@ flatpak --user remote-add --if-not-exists flathub https://flathub.org/repo/flath
 
 ### Clone the repo
 ```bash
-git clone --recurse-submodules -j4 https://gitlab.com/leinardi/gwe.git
+git clone --recurse-submodules -j4 https://github.com/sir-maniac/GreenWithEnvy2.git
 ```
 It is possible to build the local source or the remote one (the same that Flathub uses)
 ### Local repository

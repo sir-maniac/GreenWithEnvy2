@@ -1,5 +1,7 @@
 # Releasing
 
+WARNING: This from the original project and has't been updated for the fork yet.
+
 1. Bump the `APP_VERSION` property in `gwe/conf.py` based on Major.Minor.Patch naming scheme
 2. Update `data/com.leinardi.gwe.appdata.xml` for the impending release.
 3. Run `./build.sh` to update the CHANGELOG.md
@@ -9,7 +11,7 @@
 7. `flatpak uninstall com.leinardi.gwe --assumeyes; ./build.sh --flatpak-local --flatpak-install --flatpak-bundle && flatpak run com.leinardi.gwe --debug`
 8. Tag version `X.Y.Z` (`git tag -s X.Y.Z`) (where X.Y.Z is the version you set in step 1)
 9. Update tag and SHA in `flatpak/com.leinardi.gwe.json`
-10. `git push --follow-tags` 
+10. `git push --follow-tags`
 11. Trigger Flathub build bot `cd flatpak && git commit -am "Release X.Y.Z" && git push` (where X.Y.Z is the version you set in step 1)
 12. Make a PR to the Flathub repository master, test the build and, if OK, merge the PR (https://github.com/flathub/com.leinardi.gwe)
 13. `git commit -am "Release X.X.X" && git push` (where X.Y.Z is the version you set in step 1)
