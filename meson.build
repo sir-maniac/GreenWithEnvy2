@@ -2,7 +2,8 @@ project('gwe',
   version: run_command(
     'grep',
     'APP_VERSION',
-    files('gwe/conf.py')
+    files('gwe/conf.py'),
+    check: true
   ).stdout().split(' = ')[1].strip().strip('"'),
   meson_version: '>= 0.63.0'
 )
