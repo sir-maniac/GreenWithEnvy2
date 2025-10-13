@@ -1,31 +1,15 @@
 # GreenWithEnvy (GWE)
 
-![archived](https://img.shields.io/badge/status-archived-lightgrey)
-
-> **⚠️ Archived / Unmaintained**
->
-> GreenWithEnvy (GWE) is **no longer actively maintained**.
->
-> - I can't run or test GWE anymore after switching my GPU from **NVIDIA to AMD**.
-> - Due to limited free time, I'm unable to review, test, or merge contributions in good faith.
->
-> If you'd like to continue development:
->
-> 1. **Fork this repository** and publish your own maintained version.
-> 2. **Use a new identifier** that doesn't reference me personally:
->    - **Git hosting**: publish under **your** namespace or a dedicated organization (not under `leinardi`).
->    - **Flatpak / Flathub**: use a new **App ID** (e.g., `io.github.<yourname>.GWE` or an org-owned ID), **not** `com.leinardi.gwe`.
->
-> I'll keep this repository archived/read-only for historical reference. Thank you to everyone who used, tested, or contributed to GWE over the years. 💚
-
----
-
-## About (historical)
+## About
 
 GWE is/was a GTK system utility designed to provide information, control the fans and overclock your NVIDIA video card
 and graphics processor.
 
-> **Note:** The information below is preserved for reference. It may be outdated and is **not supported**.
+Forked from https://gitlab.com/leinardi/gwe. This fork is in it's initial stages of updating for a release. Issues and pull requests welcome.
+
+I don't have a lot of time, so feel free to fork and release if you feel you have more time to devote to this project.
+
+> **Note:** As this is a new fork, the infomration below may not be up-to-date, as it is copied from the original project.
 
 ## 💡 Features
 <img src="/data/icons/hicolor/48x48@2x/apps/com.leinardi.gwe.png" width="96" align="right" hspace="0" />
@@ -276,7 +260,7 @@ To know more about Coolbits and how to enable them click
 (to enable both OC and Fan control you need to set it to `12`).
 
 ### Can I make the power limit survive a reboot?
-GWE cannot set the power limit automatically because, to change this value, root permission is required.  
+GWE cannot set the power limit automatically because, to change this value, root permission is required.
 If your distribution is using systemd, you can easily set the power limit on boot creating a custom service.
 
 Simply create a new file `/etc/systemd/system/nvidia-tdp.timer` and paste the following text inside:
