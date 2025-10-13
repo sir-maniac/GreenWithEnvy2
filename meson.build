@@ -4,7 +4,7 @@ project('gwe',
     'APP_VERSION',
     files('gwe/conf.py')
   ).stdout().split(' = ')[1].strip().strip('"'),
-  meson_version: '>= 0.45.1'
+  meson_version: '>= 0.63.0'
 )
 # project version is defined in gwe/conf.py
 
