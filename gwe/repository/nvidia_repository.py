@@ -14,16 +14,21 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with gst.  If not, see <http://www.gnu.org/licenses/>.
+from ast import Param
 import logging
+import sys
 import threading
 import time
-from typing import List, Dict, Optional, Tuple, Callable, Any
+from typing import List, Dict, Optional, ParamSpec, Tuple, Callable, Any, TypeVar, Union, cast
 
 from Xlib import display
 from Xlib.ext.nvcontrol import Gpu, Cooler
 from injector import singleton, inject
+from numpy import isin
 from py3nvml import py3nvml
-from py3nvml.py3nvml import NVML_CLOCK_SM, NVMLError, NVML_ERROR_NOT_SUPPORTED, NVML_ERROR_UNKNOWN, \
+
+from py3nvml.py3nvml import c_nvmlMemory_t, NVML_CLOCK_GRAPHICS, NVML_CLOCK_MEM, NVML_CLOCK_SM, NVML_CLOCK_VIDEO, \
+    NVMLError, NVML_ERROR_NOT_SUPPORTED, NVML_ERROR_UNKNOWN, \
     NVML_TEMPERATURE_GPU, NVML_TEMPERATURE_THRESHOLD_SLOWDOWN, NVML_TEMPERATURE_THRESHOLD_SHUTDOWN
 
 from gwe.model.clocks import Clocks
@@ -41,6 +46,9 @@ _LOG = logging.getLogger(__name__)
 _NVIDIA_SMI_BINARY_NAME = 'nvidia-smi'
 _NVIDIA_SETTINGS_BINARY_NAME = 'nvidia-settings'
 
+DEFAULT_MAX_MEMORY = 4069
+DEFAULT_MAX_GPU_CLOCK = 2000
+DEFAULT_MAX_MEM_CLOCK = 7000
 
 @singleton
 class NvidiaRepository:
@@ -53,7 +61,7 @@ class NvidiaRepository:
 
     @staticmethod
     def is_nvidia_smi_available() -> bool:
-        return run_and_get_stdout(['which', _NVIDIA_SMI_BINARY_NAME])[0] == 0
+        return cast(bool, run_and_get_stdout(['which', _NVIDIA_SMI_BINARY_NAME])[0] == 0)
 
     def set_ctrl_display(self, ctrl_display: str) -> None:
         self._ctrl_display = ctrl_display
@@ -84,6 +92,60 @@ class NvidiaRepository:
             _LOG.exception("Error while checking NVML Shared Library")
         return False
 
+    @staticmethod
+    def _get_item(dict: Optional[Dict[str, str | int]] , key: str) -> Optional[int]:
+        if dict is None:
+            return None
+        v = dict.get(key)
+        if v is None:
+            return None
+        assert isinstance(v, int)
+        return v
+
+    @synchronized_with_attr("_lock")
+    def get_max_values(self) -> Tuple[int,Clocks]:
+        py3nvml.nvmlInit()
+        xlib_display = display.Display(self._ctrl_display)
+        gpu_count = xlib_display.nvcontrol_get_gpu_count()
+
+        mem_total: int = DEFAULT_MAX_MEMORY
+        mem_clock_max: int = DEFAULT_MAX_MEM_CLOCK
+        graphic_max: int = DEFAULT_MAX_GPU_CLOCK
+        sm_max: int = 0
+        video_max: int= 0
+
+        for gpu_index in range(gpu_count):
+            gpu = Gpu(gpu_index)
+            uuid: Optional[str] = xlib_display.nvcontrol_get_gpu_uuid(gpu)
+            assert uuid is not None
+            handle = py3nvml.nvmlDeviceGetHandleByUUID(uuid.encode('utf-8'))
+            mem_info = self._nvml_get_val(py3nvml.nvmlDeviceGetMemoryInfo,  handle)
+            if mem_info is not None:
+                mem_total = max(mem_total, mem_info.total // 1024 // 1024)
+
+            perf_modes: List[Dict[str,str|int]] = xlib_display.nvcontrol_get_performance_modes(gpu)
+            perf_mode = next((p for p in perf_modes if p['perf'] == len(perf_modes) - 1), None)
+            g_max = perf_mode.get('nvclockmax') if perf_mode is not None else None
+            if g_max is not None:
+                assert isinstance(g_max, int)
+                graphic_max = max(graphic_max, g_max)
+
+            sm = self._nvml_get_val(py3nvml.nvmlDeviceGetMaxClockInfo, handle, NVML_CLOCK_SM)
+            if sm is not None:
+                sm_max = max(sm_max, sm)
+            mem_clk = self._nvml_get_val(py3nvml.nvmlDeviceGetMaxClockInfo, handle, NVML_CLOCK_MEM)
+            if mem_clk is not None:
+                mem_clock_max = max(mem_clock_max, mem_clk)
+            v_max = self._nvml_get_val(py3nvml.nvmlDeviceGetMaxClockInfo, handle, NVML_CLOCK_VIDEO)
+            if v_max is not None:
+                video_max = max(video_max, v_max)
+
+        return (mem_total,
+                Clocks(graphic_max=graphic_max,
+                       sm_max=sm_max,
+                       memory_max=mem_clock_max,
+                       video_max=video_max))
+
     @synchronized_with_attr("_lock")
     def get_status(self) -> Optional[Status]:
         xlib_display = None
@@ -97,9 +159,10 @@ class NvidiaRepository:
                 gpu = Gpu(gpu_index)
                 uuid = xlib_display.nvcontrol_get_gpu_uuid(gpu)
                 handle = py3nvml.nvmlDeviceGetHandleByUUID(uuid.encode('utf-8'))
-                memory_total = None
-                memory_used = None
+                memory_total: Optional[int] = None
+                memory_used: Optional[int] = None
                 mem_info = self._nvml_get_val(py3nvml.nvmlDeviceGetMemoryInfo, handle)
+                assert isinstance(mem_info, c_nvmlMemory_t)
                 if mem_info is not None:
                     memory_used = mem_info.used // 1024 // 1024
                     memory_total = mem_info.total // 1024 // 1024
@@ -126,25 +189,27 @@ class NvidiaRepository:
                 power = self._get_power_from_py3nvml(handle)
                 temp = self._get_temp_from_py3nvml(handle)
 
-                perf_modes = xlib_display.nvcontrol_get_performance_modes(gpu)
+                perf_modes: List[Dict[str, str | int]] = xlib_display.nvcontrol_get_performance_modes(gpu)
                 perf_mode = next((p for p in perf_modes if p['perf'] == len(perf_modes) - 1), None)
-                clock_info = xlib_display.nvcontrol_get_clock_info(gpu)
+                clock_info: Dict[str, str | int] = xlib_display.nvcontrol_get_clock_info(gpu)
+
                 if perf_mode:
                     clocks = Clocks(
-                        graphic_current=clock_info.get('nvclock') if clock_info is not None else None,
-                        graphic_max=perf_mode.get('nvclockmax') if perf_mode is not None else None,
+                        graphic_current=self._get_item(clock_info, 'nvclock'),
+                        graphic_max=self._get_item(perf_mode, 'nvclockmax'),
                         sm_current=self._nvml_get_val(py3nvml.nvmlDeviceGetClockInfo, handle, NVML_CLOCK_SM),
                         sm_max=self._nvml_get_val(py3nvml.nvmlDeviceGetMaxClockInfo, handle, NVML_CLOCK_SM),
-                        memory_current=clock_info.get('memclock') if clock_info is not None else None,
-                        memory_max=perf_mode.get('memclockmax') if perf_mode is not None else None,
-                        video_current=self._nvml_get_val(py3nvml.nvmlDeviceGetClockInfo, handle, 3),  # Missing
-                        video_max=self._nvml_get_val(py3nvml.nvmlDeviceGetMaxClockInfo, handle, 3)  # Missing
+                        memory_current=self._get_item(clock_info, 'memclock'),
+                        memory_max=self._get_item(perf_mode, 'memclockmax'),
+                        video_current=self._nvml_get_val(py3nvml.nvmlDeviceGetClockInfo, handle, NVML_CLOCK_VIDEO),
+                        video_max=self._nvml_get_val(py3nvml.nvmlDeviceGetMaxClockInfo, handle, NVML_CLOCK_VIDEO)
                     )
                 else:
                     clocks = Clocks()
 
                 perf_level_max = perf_mode.get('perf') if perf_mode else None
-                mem_transfer_rate_offset_range = \
+                assert perf_level_max is None or isinstance(perf_level_max, int)
+                mem_transfer_rate_offset_range: Optional[Tuple[int, int]] = \
                     xlib_display.nvcontrol_get_mem_transfer_rate_offset_range(gpu, perf_level_max)
                 if mem_transfer_rate_offset_range is not None:
                     mem_clock_offset_range = (mem_transfer_rate_offset_range[0] // 2,
@@ -162,7 +227,7 @@ class NvidiaRepository:
                         perf_level_max=perf_level_max
                     )
                 else:
-                    overclock = Overclock(perf_level_max=perf_mode.get('perf') if perf_mode else None)
+                    overclock = Overclock(perf_level_max=self._get_item(perf_mode, 'perf'))
 
                 manual_control = xlib_display.nvcontrol_get_cooler_manual_control_enabled(gpu)
                 fan_list: Optional[List[Tuple[int, int]]] = None
@@ -171,8 +236,8 @@ class NvidiaRepository:
                     fan_list = []
                     for i in fan_indexes:
                         fan = Cooler(i)
-                        duty = xlib_display.nvcontrol_get_fan_duty(fan)
-                        rpm = xlib_display.nvcontrol_get_fan_rpm(fan)
+                        duty: Optional[int] = xlib_display.nvcontrol_get_fan_duty(fan)
+                        rpm: Optional[int] = xlib_display.nvcontrol_get_fan_rpm(fan)
                         if duty is not None and rpm is not None:
                             fan_list.append((duty, rpm))
                 fan = Fan(
@@ -236,7 +301,7 @@ class NvidiaRepository:
                str(limit)]
         result = run_and_get_stdout(cmd)
         _LOG.info(f"Exit code: {result[0]}. {result[1]}\n{result[2]}")
-        return result[0] == 0
+        return cast(bool, result[0] == 0)
 
     def set_all_gpus_fan_to_auto(self) -> None:
         for gpu_index in range(self._gpu_count):
@@ -258,10 +323,24 @@ class NvidiaRepository:
         xlib_display.close()
         return error
 
+    T = TypeVar('T')
+    P = ParamSpec('P')
     @staticmethod
-    def _nvml_get_val(a_function: Callable, *args: Any) -> Any:
+    def _nvml_get_val(a_function: Callable[P, Union[str, T]],
+                      /,
+                      *args: P.args,
+                      **kwargs: P.kwargs) -> Optional[T]:
         try:
-            return a_function(*args)
+            # manage the peculiarity of all py3nvml functions returning a
+            # possible string, even if the original function doesn't
+            #
+            # For the type checker, I can remove the `str` type from the
+            #  return type by specifying it in the Callable[] definition
+            #  because unions are flattened when nested
+
+            # I don't know why MyPy says cast() is returning Any
+            return cast(Optional[NvidiaRepository.T], a_function(*args, **kwargs))
+
         except NVMLError as err:
             if err.value == NVML_ERROR_NOT_SUPPORTED:
                 _LOG.debug(f"Function {a_function.__name__} not supported")
@@ -274,6 +353,7 @@ class NvidiaRepository:
 
     def _get_power_from_py3nvml(self, handle: Any) -> Power:
         power_con = self._nvml_get_val(py3nvml.nvmlDeviceGetPowerManagementLimitConstraints, handle)
+
         return Power(
             draw=self._convert_milliwatt_to_watt(self._nvml_get_val(py3nvml.nvmlDeviceGetPowerUsage, handle)),
             limit=self._convert_milliwatt_to_watt(
@@ -287,8 +367,8 @@ class NvidiaRepository:
         )
 
     @staticmethod
-    def _convert_milliwatt_to_watt(milliwatt: Optional[int]) -> Optional[float]:
-        return None if milliwatt is None else milliwatt / 1000
+    def _convert_milliwatt_to_watt(milliwatt: Optional[int|str]) -> Optional[float]:
+        return None if milliwatt is None else int(milliwatt) / 1000
 
     def _get_temp_from_py3nvml(self, handle: Any) -> Temp:
         return Temp(

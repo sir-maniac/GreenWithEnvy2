@@ -1,0 +1,7 @@
+# Requirements for development dependencies
+
+# Include all production dependencies
+-r requirements.txt
+
+pygobject-stubs --config-settings="config=Gtk3,Gdk3"
+pytest == 8.4.2

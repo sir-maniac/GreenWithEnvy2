@@ -39,7 +39,6 @@ pkgs.mkShell {
     gobject-introspection
     desktop-file-utils
     gtk3
-    libdazzle
     libnotify
     # needed it because I use the unstable kernel in my configuration.nix
     unstable.linuxPackages.nvidia_x11

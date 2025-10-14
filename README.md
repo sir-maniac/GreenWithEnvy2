@@ -69,7 +69,7 @@ For older Fedora releases you can use [COPR package](https://copr.fedorainfraclo
 
 ### Install from source code
 #### Build time dependencies
-| Distro                | pkg-config         | Python 3.8+   | gobject-introspection       | meson | ninja-build | appstream-util |
+| Distro                | pkg-config         | Python 3.9+   | gobject-introspection       | meson | ninja-build | appstream-util |
 | --------------------- | ------------------ | ------------- | --------------------------- | ----- | ----------- | -------------- |
 | Arch Linux            | pkg-config         | python        | gobject-introspection       | meson | ninja       | appstream-glib |
 | Fedora                | pkgconf-pkg-config | python3-devel | gobject-introspection-devel | meson | ninja-build | appstream-util |
@@ -94,36 +94,36 @@ sudo apt install pkg-config python3-dev libgirepository1.0-dev meson ninja-build
 ```
 
 #### Run time dependencies
-| Distro      | Python 3.8+ | pip         | gobject-introspection       | libappindicator          | gnome-shell-extension-appindicator | libdazzle |
-|-------------| ----------- | ----------- | --------------------------- | ------------------------ | ---------------------------------- | --------- |
-| Arch Linux  | python      | python-pip  | gobject-introspection       | libappindicator3         | gnome-shell-extension-appindicator | libdazzle |
-| Fedora      | python3     | python3-pip | gobject-introspection-devel | libappindicator-gtk3     | gnome-shell-extension-appindicator | libdazzle |
-| OpenSUSE    | python3     | python3-pip | gobject-introspection       | libappindicator3-1       | gnome-shell-extension-appindicator | typelib-1_0-libdazzle-1_0 |
-| Ubuntu      | python3     | python3-pip | libgirepository1.0-dev      | gir1.2-appindicator3-0.1 | gnome-shell-extension-appindicator | libdazzle-1.0-dev |
-| Debian      | python3     | python3-pip | libgirepository1.0-dev      | gir1.2-ayatanaappindicator3-0.1  | gnome-shell-extension-appindicator | libdazzle-1.0-dev |
+| Distro      | Python 3.9+ | pip         | gobject-introspection       | libappindicator          | gnome-shell-extension-appindicator |
+|-------------| ----------- | ----------- | --------------------------- | ------------------------ | ---------------------------------- |
+| Arch Linux  | python      | python-pip  | gobject-introspection       | libappindicator3         | gnome-shell-extension-appindicator |
+| Fedora      | python3     | python3-pip | gobject-introspection-devel | libappindicator-gtk3     | gnome-shell-extension-appindicator |
+| OpenSUSE    | python3     | python3-pip | gobject-introspection       | libappindicator3-1       | gnome-shell-extension-appindicator |
+| Ubuntu      | python3     | python3-pip | libgirepository1.0-dev      | gir1.2-appindicator3-0.1 | gnome-shell-extension-appindicator |
+| Debian      | python3     | python3-pip | libgirepository1.0-dev      | gir1.2-ayatanaappindicator3-0.1  | gnome-shell-extension-appindicator |
 [comment]: <> (TODO: confirm if only debian and only KDE-Plasma. Might affect more systems and Desktop Environments)
 
 Arch Linux:
 ```bash
-sudo pacman -S python python-pip gobject-introspection libappindicator3 gnome-shell-extension-appindicator libdazzle
+sudo pacman -S python python-pip gobject-introspection libappindicator3 gnome-shell-extension-appindicator
 ```
 
 Fedora:
 ```bash
-sudo dnf install python3 python3-pip gobject-introspection-devel libappindicator-gtk3 gnome-shell-extension-appindicator libdazzle
+sudo dnf install python3 python3-pip gobject-introspection-devel libappindicator-gtk3 gnome-shell-extension-appindicator
 ```
 OpenSUSE:
 ```bash
-sudo zypper install python3 python3-pip gobject-introspection libappindicator3-1 gnome-shell-extension-appindicator typelib-1_0-libdazzle-1_0
+sudo zypper install python3 python3-pip gobject-introspection libappindicator3-1 gnome-shell-extension-appindicator
 ```
 Ubuntu:
 ```bash
-sudo apt install python3 python3-pip libgirepository1.0-dev gir1.2-appindicator3-0.1 gnome-shell-extension-appindicator libdazzle-1.0-dev
+sudo apt install python3 python3-pip libgirepository1.0-dev gir1.2-appindicator3-0.1 gnome-shell-extension-appindicator
 ```
 
 Debian:
 ```bash
-sudo apt install python3 python3-pip libgirepository1.0-dev gir1.2-ayatanaappindicator3-0.1 gnome-shell-extension-appindicator libdazzle-1.0-dev
+sudo apt install python3 python3-pip libgirepository1.0-dev gir1.2-ayatanaappindicator3-0.1 gnome-shell-extension-appindicator
 ```
 
 plus all the Python dependencies listed in [requirements.txt](requirements.txt)
@@ -345,10 +345,8 @@ feel free to open an issue on the [issue tracker](https://gitlab.com/leinardi/gw
 ## ⚠ Dropped PyPI support
 Development builds were previously distributed using PyPI. This way of distributing the software is simple
 but requires the user to manually install all the non Python dependencies like cairo, glib, appindicator3, etc.
-The current implementation of the historical data uses a new library, Dazzle, that requires Gnome 3.30 which is
-available, using Python Object introspection, only starting from Ubuntu 18.10 making the latest Ubuntu LTS, 18.04,
-unsupported.
-A solution for all this problems is distributing the app via Flatpak, since with it all the dependencies
+
+A solution for this problems is distributing the app via Flatpak, since with it all the dependencies
 will be bundled and provided automatically, making possible to use Gnome 3.30 features also on distributions
 using an older version of Gnome.
 
