@@ -14,6 +14,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with gst.  If not, see <http://www.gnu.org/licenses/>.
+from dataclasses import dataclass
 from gwe.model.clocks import Clocks
 from gwe.model.fan import Fan
 from gwe.model.info import Info
@@ -21,21 +22,12 @@ from gwe.model.overclock import Overclock
 from gwe.model.power import Power
 from gwe.model.temp import Temp
 
-
+@dataclass
 class GpuStatus:
-    def __init__(self,
-                 index: int,
-                 info: Info,
-                 power: Power,
-                 temp: Temp,
-                 fan: Fan,
-                 clocks: Clocks,
-                 overclock: Overclock
-                 ) -> None:
-        self.index = index
-        self.info = info
-        self.power = power
-        self.temp = temp
-        self.fan = fan
-        self.clocks = clocks
-        self.overclock = overclock
+    index: int
+    info: Info
+    power: Power
+    temp: Temp
+    fan: Fan
+    clocks: Clocks
+    overclock: Overclock

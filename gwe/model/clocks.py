@@ -14,25 +14,16 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with gst.  If not, see <http://www.gnu.org/licenses/>.
+from dataclasses import dataclass
 from typing import Optional
 
-
+@dataclass
 class Clocks:
-    def __init__(self,
-                 graphic_current: Optional[int] = None,
-                 graphic_max: Optional[int] = None,
-                 sm_current: Optional[int] = None,
-                 sm_max: Optional[int] = None,
-                 memory_current: Optional[int] = None,
-                 memory_max: Optional[int] = None,
-                 video_current: Optional[int] = None,
-                 video_max: Optional[int] = None
-                 ) -> None:
-        self.graphic_current: Optional[int] = graphic_current
-        self.graphic_max: Optional[int] = graphic_max
-        self.sm_current: Optional[int] = sm_current
-        self.sm_max: Optional[int] = sm_max
-        self.memory_current: Optional[int] = memory_current
-        self.memory_max: Optional[int] = memory_max
-        self.video_current: Optional[int] = video_current
-        self.video_max: Optional[int] = video_max
+    graphic_current: Optional[int] = None
+    graphic_max: Optional[int] = None
+    sm_current: Optional[int] = None
+    sm_max: Optional[int] = None
+    memory_current: Optional[int] = None
+    memory_max: Optional[int] = None
+    video_current: Optional[int] = None
+    video_max: Optional[int] = None

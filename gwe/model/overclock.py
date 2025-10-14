@@ -14,21 +14,15 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with gst.  If not, see <http://www.gnu.org/licenses/>.
+from dataclasses import dataclass
 from typing import Optional, Tuple
 
 
+@dataclass
 class Overclock:
-    def __init__(self,
-                 perf_level_max: Optional[int] = None,
-                 available: bool = False,
-                 gpu_range: Optional[Tuple[int, int]] = None,
-                 gpu_offset: Optional[int] = None,
-                 memory_range: Optional[Tuple[int, int]] = None,
-                 memory_offset: Optional[int] = None
-                 ) -> None:
-        self.perf_level_max: Optional[int] = perf_level_max
-        self.available: bool = available
-        self.gpu_range: Optional[Tuple[int, int]] = gpu_range
-        self.gpu_offset: Optional[int] = gpu_offset
-        self.memory_range: Optional[Tuple[int, int]] = memory_range
-        self.memory_offset: Optional[int] = memory_offset
+    perf_level_max: Optional[int] = None
+    available: bool = False
+    gpu_range: Optional[Tuple[int, int]] = None
+    gpu_offset: Optional[int] = None
+    memory_range: Optional[Tuple[int, int]] = None
+    memory_offset: Optional[int] = None

@@ -14,15 +14,11 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with gst.  If not, see <http://www.gnu.org/licenses/>.
+from dataclasses import dataclass
 from typing import List, Optional, Tuple
 
-
+@dataclass
 class Fan:
-    def __init__(self,
-                 fan_list: Optional[List[Tuple[int, int]]] = None,
-                 control_allowed: bool = False,
-                 manual_control: bool = False
-                 ) -> None:
-        self.fan_list = fan_list
-        self.control_allowed = control_allowed
-        self.manual_control = manual_control
+    fan_list: Optional[List[Tuple[int, int]]] = None
+    control_allowed: bool = False
+    manual_control: bool = False

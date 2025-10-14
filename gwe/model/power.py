@@ -14,21 +14,14 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with gst.  If not, see <http://www.gnu.org/licenses/>.
+from dataclasses import dataclass
 from typing import Optional
 
-
+@dataclass
 class Power:
-    def __init__(self,
-                 draw: Optional[float] = None,
-                 limit: Optional[float] = None,
-                 default: Optional[float] = None,
-                 minimum: Optional[float] = None,
-                 enforced: Optional[float] = None,
-                 maximum: Optional[float] = None
-                 ) -> None:
-        self.draw: Optional[float] = draw
-        self.limit: Optional[float] = limit
-        self.default: Optional[float] = default
-        self.minimum: Optional[float] = minimum
-        self.enforced: Optional[float] = enforced
-        self.maximum: Optional[float] = maximum
+    draw: Optional[float] = None
+    limit: Optional[float] = None
+    default: Optional[float] = None
+    minimum: Optional[float] = None
+    enforced: Optional[float] = None
+    maximum: Optional[float] = None

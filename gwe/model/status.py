@@ -14,13 +14,10 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with gst.  If not, see <http://www.gnu.org/licenses/>.
+from dataclasses import dataclass
 from typing import List
 
 from gwe.model.gpu_status import GpuStatus
-
-
+@dataclass
 class Status:
-    def __init__(self,
-                 gpu_status_list: List[GpuStatus]
-                 ) -> None:
-        self.gpu_status_list = gpu_status_list
+    gpu_status_list: List[GpuStatus]

@@ -14,17 +14,12 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with gst.  If not, see <http://www.gnu.org/licenses/>.
+from dataclasses import dataclass
 from typing import Optional
 
-
+@dataclass
 class Temp:
-    def __init__(self,
-                 gpu: Optional[int] = None,
-                 maximum: Optional[int] = None,
-                 slowdown: Optional[int] = None,
-                 shutdown: Optional[int] = None
-                 ) -> None:
-        self.gpu: Optional[int] = gpu
-        self.maximum: Optional[int] = maximum
-        self.slowdown: Optional[int] = slowdown
-        self.shutdown: Optional[int] = shutdown
+    gpu: Optional[int] = None
+    maximum: Optional[int] = None
+    slowdown: Optional[int] = None
+    shutdown: Optional[int] = None
