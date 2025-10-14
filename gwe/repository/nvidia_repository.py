@@ -39,7 +39,6 @@ from gwe.model.gpu_status import GpuStatus
 from gwe.model.info import Info
 from gwe.model.overclock import Overclock
 from gwe.model.power import Power
-from gwe.model.status import Status
 from gwe.model.temp import Temp
 from gwe.repository import run_and_get_stdout
 from gwe.util.concurrency import synchronized_with_attr
@@ -151,7 +150,7 @@ class NvidiaRepository:
                        video_max=video_max))
 
     @synchronized_with_attr("_lock")
-    def get_status(self) -> Optional[Status]:
+    def get_status(self) -> Optional[List[GpuStatus]]:
         xlib_display = None
         try:
             time1 = time.time()
@@ -273,7 +272,7 @@ class NvidiaRepository:
                 gpu_status_list.append(gpu_status)
             time2 = time.time()
             _LOG.debug(f'Fetching new data took {((time2 - time1) * 1000.0):.3f} ms')
-            return Status(gpu_status_list)
+            return gpu_status_list
         except:
             _LOG.exception("Error while getting status")
         finally:

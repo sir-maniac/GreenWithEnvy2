@@ -25,8 +25,8 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_gtk3agg import FigureCanvasGTK3Agg as FigureCanvas
 
 from gwe.interactor.settings_interactor import SettingsInteractor
-from gwe.model.status import Status
 from gwe.model.fan_profile import FanProfile
+from gwe.model.gpu_status import GpuStatus
 _LOG = logging.getLogger(__name__)
 
 try:  # AppIndicator3 may not be installed
@@ -223,10 +223,10 @@ class MainView(MainViewInterface):
         dialog.run()
         dialog.destroy()
 
-    def refresh_status(self, status: Optional[Status], gpu_index: int) -> None:
+    def refresh_status(self, status: Optional[List[GpuStatus]], gpu_index: int) -> None:
         _LOG.debug('view status')
         if status:
-            gpu_status = status.gpu_status_list[gpu_index]
+            gpu_status = status[gpu_index]
             if self._first_refresh:
                 self._first_refresh = False
                 self._set_entry_text(self._info_name_entry, gpu_status.info.name)

@@ -16,13 +16,13 @@
 # along with gwe.  If not, see <http://www.gnu.org/licenses/>.
 import logging
 from enum import Enum
-from typing import Any, Tuple, Dict
+from typing import Any, List, Tuple, Dict
 
 from gi.repository import Gtk, GLib
 from injector import singleton, inject
 
 from gwe.interactor.settings_interactor import SettingsInteractor
-from gwe.model.status import Status
+from gwe.model.gpu_status import GpuStatus
 from gwe.repository.nvidia_repository import DEFAULT_MAX_GPU_CLOCK, DEFAULT_MAX_MEM_CLOCK
 from gwe.util.view import hide_on_delete
 
@@ -90,14 +90,14 @@ class HistoricalDataPresenter:
         self.view: HistoricalDataViewInterface = HistoricalDataViewInterface()
         self._gpu_index: int = 0
 
-    def add_status(self, new_status: Status, gpu_index: int) -> None:
+    def add_status(self, new_status: List[GpuStatus], gpu_index: int) -> None:
         if self._gpu_index != gpu_index:
             self._gpu_index = gpu_index
             self.view.reset_graphs()
 
         data: Dict[GraphType, Tuple[int, float]] = {}
         time = GLib.get_monotonic_time()
-        gpu_status = new_status.gpu_status_list[gpu_index]
+        gpu_status = new_status[gpu_index]
         gpu_clock = gpu_status.clocks.graphic_current
         if gpu_clock is not None:
             data[GraphType.GPU_CLOCK] = (time, float(gpu_clock))
