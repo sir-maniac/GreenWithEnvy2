@@ -19,7 +19,7 @@ import logging
 import sys
 import threading
 import time
-from typing import List, Dict, Optional, ParamSpec, Tuple, Callable, Any, TypeVar, Union, cast
+from typing import List, Dict, Optional, Tuple, Callable, Any, TypeVar, Union, cast
 
 from Xlib import display
 from Xlib.ext.nvcontrol import Gpu, Cooler
@@ -50,6 +50,7 @@ DEFAULT_MAX_MEMORY = 4069
 DEFAULT_MAX_GPU_CLOCK = 2000
 DEFAULT_MAX_MEM_CLOCK = 7000
 
+T = TypeVar('T')
 @singleton
 class NvidiaRepository:
     @inject
@@ -93,7 +94,7 @@ class NvidiaRepository:
         return False
 
     @staticmethod
-    def _get_item(dict: Optional[Dict[str, str | int]] , key: str) -> Optional[int]:
+    def _get_item(dict: Optional[Dict[str, Union[str, int]]], key: str) -> Optional[int]:
         if dict is None:
             return None
         v = dict.get(key)
@@ -123,7 +124,7 @@ class NvidiaRepository:
             if mem_info is not None:
                 mem_total = max(mem_total, mem_info.total // 1024 // 1024)
 
-            perf_modes: List[Dict[str,str|int]] = xlib_display.nvcontrol_get_performance_modes(gpu)
+            perf_modes: List[Dict[str, Union[str, int]]] = xlib_display.nvcontrol_get_performance_modes(gpu)
             perf_mode = next((p for p in perf_modes if p['perf'] == len(perf_modes) - 1), None)
             g_max = perf_mode.get('nvclockmax') if perf_mode is not None else None
             if g_max is not None:
@@ -189,9 +190,9 @@ class NvidiaRepository:
                 power = self._get_power_from_py3nvml(handle)
                 temp = self._get_temp_from_py3nvml(handle)
 
-                perf_modes: List[Dict[str, str | int]] = xlib_display.nvcontrol_get_performance_modes(gpu)
+                perf_modes: List[Dict[str, Union[str, int]]] = xlib_display.nvcontrol_get_performance_modes(gpu)
                 perf_mode = next((p for p in perf_modes if p['perf'] == len(perf_modes) - 1), None)
-                clock_info: Dict[str, str | int] = xlib_display.nvcontrol_get_clock_info(gpu)
+                clock_info: Dict[str, Union[str, int]] = xlib_display.nvcontrol_get_clock_info(gpu)
 
                 if perf_mode:
                     clocks = Clocks(
@@ -323,13 +324,11 @@ class NvidiaRepository:
         xlib_display.close()
         return error
 
-    T = TypeVar('T')
-    P = ParamSpec('P')
     @staticmethod
-    def _nvml_get_val(a_function: Callable[P, Union[str, T]],
+    def _nvml_get_val(a_function: Callable[..., Union[str, T]],
                       /,
-                      *args: P.args,
-                      **kwargs: P.kwargs) -> Optional[T]:
+                      *args: Any,
+                      **kwargs: Any) -> Optional[T]:
         try:
             # manage the peculiarity of all py3nvml functions returning a
             # possible string, even if the original function doesn't
@@ -367,7 +366,7 @@ class NvidiaRepository:
         )
 
     @staticmethod
-    def _convert_milliwatt_to_watt(milliwatt: Optional[int|str]) -> Optional[float]:
+    def _convert_milliwatt_to_watt(milliwatt: Optional[Union[int, str]]) -> Optional[float]:
         return None if milliwatt is None else int(milliwatt) / 1000
 
     def _get_temp_from_py3nvml(self, handle: Any) -> Temp:
