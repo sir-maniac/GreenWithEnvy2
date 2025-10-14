@@ -15,6 +15,12 @@
 # You should have received a copy of the GNU General Public License
 # along with gwe.  If not, see <http://www.gnu.org/licenses/>.
 
+# AppIndicator can be unbound, and that is expected
+# pyright: reportPossiblyUnboundVariable=false
+
+# pyright doesn't handle GLib.GEnum type correctly
+# pyright: reportArgumentType=false
+
 import logging
 from collections import OrderedDict
 from typing import Optional, Dict, List, Tuple, Any, cast
@@ -29,20 +35,24 @@ from gwe.model.fan_profile import FanProfile
 from gwe.model.gpu_status import GpuStatus
 _LOG = logging.getLogger(__name__)
 
+HAS_MODULE_INDICATOR: bool
+
 try:  # AppIndicator3 may not be installed
     import gi
     gi.require_version('AppIndicator3', '0.1')
     from gi.repository import AppIndicator3
     # TODO logging debug only works once app.py Application do_activate is called. Therefore we use warning here
     _LOG.warning("Sucessfully found AppIndicator3")
+    HAS_MODULE_INDICATOR = True
 except (ImportError, ValueError):
     try:  # AyatanaAppIndicator3 may not be installed
         import gi
         gi.require_version("AyatanaAppIndicator3", "0.1")
-        from gi.repository import AyatanaAppIndicator3 as AppIndicator3
+        from gi.repository import AyatanaAppIndicator3 as AppIndicator3  # type:ignore [no-redef]
         _LOG.warning("Sucessfully found AyatanaAppIndicator3")
+        HAS_MODULE_INDICATOR = True
     except (ImportError, ValueError):
-        AppIndicator3 = None
+        HAS_MODULE_INDICATOR = False
 
 from gwe.di import MainBuilder
 from gwe.view.edit_fan_profile_view import EditFanProfileView
@@ -53,7 +63,7 @@ from gwe.view.preferences_view import PreferencesView
 from gwe.conf import APP_PACKAGE_NAME, APP_ID, APP_NAME, APP_VERSION, APP_SOURCE_URL, APP_ICON_NAME_SYMBOLIC
 from gwe.presenter.main_presenter import MainPresenter, MainViewInterface
 
-if AppIndicator3 is None:
+if not HAS_MODULE_INDICATOR:
     _LOG.warning("AppIndicator3 is not installed. The App indicator will not be shown.")
 
 
@@ -180,7 +190,7 @@ class MainView(MainViewInterface):
         self._init_app_indicator()
 
     def _init_app_indicator(self) -> None:
-        if AppIndicator3:
+        if HAS_MODULE_INDICATOR:
             # Setting icon name in new() as '', because new() wants an icon path
             self._app_indicator = AppIndicator3.Indicator \
                 .new(APP_ID, '', AppIndicator3.IndicatorCategory.HARDWARE)
@@ -312,7 +322,7 @@ class MainView(MainViewInterface):
                     value.set_visible(False)
                     self._fan_rpm[index].set_visible(False)
 
-            if self._app_indicator:
+            if HAS_MODULE_INDICATOR and self._app_indicator:
                 if self._settings_interactor.get_bool('settings_show_app_indicator'):
                     self._app_indicator.set_status(AppIndicator3.IndicatorStatus.ACTIVE)
                 else:
