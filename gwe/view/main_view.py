@@ -17,7 +17,7 @@
 
 import logging
 from collections import OrderedDict
-from typing import Optional, Dict, List, Tuple, Any
+from typing import Optional, Dict, List, Tuple, Any, cast
 
 from injector import inject, singleton
 from gi.repository import Gtk
@@ -84,88 +84,88 @@ class MainView(MainViewInterface):
 
     def _init_widgets(self) -> None:
         self._app_indicator: Optional[AppIndicator3.Indicator] = None
-        self._window = self._builder.get_object("application_window")
+        self._window = cast(Gtk.ApplicationWindow, self._builder.get_object("application_window"))
         self._edit_fan_profile_view.set_transient_for(self._window)
         self._edit_overclock_profile_view.set_transient_for(self._window)
         self._historical_data_view.set_transient_for(self._window)
         self._preferences_view.set_transient_for(self._window)
-        self._main_menu: Gtk.Menu = self._builder.get_object("main_menu")
-        self._main_infobar: Gtk.InfoBar = self._builder.get_object("main_infobar")
+        self._main_menu = cast(Gtk.Menu, self._builder.get_object("main_menu"))
+        self._main_infobar = cast(Gtk.InfoBar, self._builder.get_object("main_infobar"))
         self._main_infobar.connect("response", lambda b, _: b.set_revealed(False))
-        self._main_infobar_label: Gtk.Label = self._builder.get_object("main_infobar_label")
+        self._main_infobar_label = cast(Gtk.Label, self._builder.get_object("main_infobar_label"))
         self._main_infobar.set_revealed(False)
-        self._statusbar: Gtk.Statusbar = self._builder.get_object('statusbar')
+        self._statusbar = cast(Gtk.Statusbar, self._builder.get_object('statusbar'))
         self._context = self._statusbar.get_context_id(APP_PACKAGE_NAME)
-        self._app_version: Gtk.Label = self._builder.get_object('app_version')
+        self._app_version = cast(Gtk.Label, self._builder.get_object('app_version'))
         self._app_version.set_label(f"{APP_NAME} v{APP_VERSION}")
-        self._about_dialog: Gtk.AboutDialog = self._builder.get_object("about_dialog")
+        self._about_dialog = cast(Gtk.AboutDialog, self._builder.get_object("about_dialog"))
         self._init_about_dialog()
-        self._info_name_entry: Gtk.Entry = self._builder.get_object('info_name_entry')
-        self._info_vbios_entry: Gtk.Entry = self._builder.get_object('info_vbios_entry')
-        self._info_driver_entry: Gtk.Entry = self._builder.get_object('info_driver_entry')
-        self._info_pcie_entry: Gtk.Entry = self._builder.get_object('info_pcie_entry')
-        self._info_cuda_entry: Gtk.Entry = self._builder.get_object('info_cuda_entry')
-        self._info_uuid_entry: Gtk.Entry = self._builder.get_object('info_uuid_entry')
-        self._info_memory_entry: Gtk.Entry = self._builder.get_object('info_memory_entry')
-        self._info_memory_interface_entry: Gtk.Entry = self._builder.get_object('info_memory_interface_entry')
-        self._info_memory_usage_entry: Gtk.Entry = self._builder.get_object('info_memory_usage_entry')
-        self._info_gpu_usage_entry: Gtk.Entry = self._builder.get_object('info_gpu_usage_entry')
-        self._info_encoder_usage_entry: Gtk.Entry = self._builder.get_object('info_encoder_usage_entry')
-        self._info_decoder_usage_entry: Gtk.Entry = self._builder.get_object('info_decoder_usage_entry')
-        self._power_draw_entry: Gtk.Entry = self._builder.get_object('power_draw_entry')
-        self._power_limit_entry: Gtk.Entry = self._builder.get_object('power_limit_entry')
-        self._power_default_entry: Gtk.Entry = self._builder.get_object('power_default_entry')
-        self._power_min_entry: Gtk.Entry = self._builder.get_object('power_min_entry')
-        self._power_enforced_entry: Gtk.Entry = self._builder.get_object('power_enforced_entry')
-        self._power_max_entry: Gtk.Entry = self._builder.get_object('power_max_entry')
-        self._clocks_graphics_current_entry: Gtk.Entry = self._builder.get_object('clocks_graphics_current_entry')
-        self._clocks_graphics_max_entry: Gtk.Entry = self._builder.get_object('clocks_graphics_max_entry')
-        self._clocks_sm_current_entry: Gtk.Entry = self._builder.get_object('clocks_sm_current_entry')
-        self._clocks_sm_max_entry: Gtk.Entry = self._builder.get_object('clocks_sm_max_entry')
-        self._clocks_memory_current_entry: Gtk.Entry = self._builder.get_object('clocks_memory_current_entry')
-        self._clocks_memory_max_entry: Gtk.Entry = self._builder.get_object('clocks_memory_max_entry')
-        self._clocks_video_current_entry: Gtk.Entry = self._builder.get_object('clocks_video_current_entry')
-        self._clocks_video_max_entry: Gtk.Entry = self._builder.get_object('clocks_video_max_entry')
-        self._overclock_gpu_offset_entry: Gtk.Entry = self._builder.get_object('overclock_gpu_offset_entry')
-        self._overclock_mem_offset_entry: Gtk.Entry = self._builder.get_object('overclock_mem_offset_entry')
-        self._info_memory_usage_levelbar: Gtk.LevelBar = self._builder.get_object('info_memory_usage_levelbar')
-        self._info_gpu_usage_levelbar: Gtk.LevelBar = self._builder.get_object('info_gpu_usage_levelbar')
-        self._info_encoder_usage_levelbar: Gtk.LevelBar = self._builder.get_object('info_encoder_usage_levelbar')
-        self._info_decoder_usage_levelbar: Gtk.LevelBar = self._builder.get_object('info_decoder_usage_levelbar')
-        self._temp_gpu_value: Gtk.Label = self._builder.get_object('temp_gpu_value')
-        self._temp_max_gpu_value: Gtk.Label = self._builder.get_object('temp_max_gpu_value')
-        self._temp_slowdown_value: Gtk.Label = self._builder.get_object('temp_slowdown_value')
-        self._temp_shutdown_value: Gtk.Label = self._builder.get_object('temp_shutdown_value')
-        self._fan_duty: Tuple = (
-            self._builder.get_object('fan_duty_0'),
-            self._builder.get_object('fan_duty_1'),
-            self._builder.get_object('fan_duty_2'),
-            self._builder.get_object('fan_duty_3'),
-            self._builder.get_object('fan_duty_4')
+        self._info_name_entry = cast(Gtk.Entry, self._builder.get_object('info_name_entry'))
+        self._info_vbios_entry = cast(Gtk.Entry, self._builder.get_object('info_vbios_entry'))
+        self._info_driver_entry = cast(Gtk.Entry, self._builder.get_object('info_driver_entry'))
+        self._info_pcie_entry = cast(Gtk.Entry, self._builder.get_object('info_pcie_entry'))
+        self._info_cuda_entry = cast(Gtk.Entry, self._builder.get_object('info_cuda_entry'))
+        self._info_uuid_entry = cast(Gtk.Entry, self._builder.get_object('info_uuid_entry'))
+        self._info_memory_entry = cast(Gtk.Entry, self._builder.get_object('info_memory_entry'))
+        self._info_memory_interface_entry = cast(Gtk.Entry, self._builder.get_object('info_memory_interface_entry'))
+        self._info_memory_usage_entry = cast(Gtk.Entry, self._builder.get_object('info_memory_usage_entry'))
+        self._info_gpu_usage_entry = cast(Gtk.Entry, self._builder.get_object('info_gpu_usage_entry'))
+        self._info_encoder_usage_entry = cast(Gtk.Entry, self._builder.get_object('info_encoder_usage_entry'))
+        self._info_decoder_usage_entry = cast(Gtk.Entry, self._builder.get_object('info_decoder_usage_entry'))
+        self._power_draw_entry = cast(Gtk.Entry, self._builder.get_object('power_draw_entry'))
+        self._power_limit_entry = cast(Gtk.Entry, self._builder.get_object('power_limit_entry'))
+        self._power_default_entry = cast(Gtk.Entry, self._builder.get_object('power_default_entry'))
+        self._power_min_entry = cast(Gtk.Entry, self._builder.get_object('power_min_entry'))
+        self._power_enforced_entry = cast(Gtk.Entry, self._builder.get_object('power_enforced_entry'))
+        self._power_max_entry = cast(Gtk.Entry, self._builder.get_object('power_max_entry'))
+        self._clocks_graphics_current_entry = cast(Gtk.Entry, self._builder.get_object('clocks_graphics_current_entry'))
+        self._clocks_graphics_max_entry = cast(Gtk.Entry, self._builder.get_object('clocks_graphics_max_entry'))
+        self._clocks_sm_current_entry = cast(Gtk.Entry, self._builder.get_object('clocks_sm_current_entry'))
+        self._clocks_sm_max_entry = cast(Gtk.Entry, self._builder.get_object('clocks_sm_max_entry'))
+        self._clocks_memory_current_entry = cast(Gtk.Entry, self._builder.get_object('clocks_memory_current_entry'))
+        self._clocks_memory_max_entry = cast(Gtk.Entry, self._builder.get_object('clocks_memory_max_entry'))
+        self._clocks_video_current_entry = cast(Gtk.Entry, self._builder.get_object('clocks_video_current_entry'))
+        self._clocks_video_max_entry = cast(Gtk.Entry, self._builder.get_object('clocks_video_max_entry'))
+        self._overclock_gpu_offset_entry = cast(Gtk.Entry, self._builder.get_object('overclock_gpu_offset_entry'))
+        self._overclock_mem_offset_entry = cast(Gtk.Entry, self._builder.get_object('overclock_mem_offset_entry'))
+        self._info_memory_usage_levelbar = cast(Gtk.LevelBar, self._builder.get_object('info_memory_usage_levelbar'))
+        self._info_gpu_usage_levelbar = cast(Gtk.LevelBar, self._builder.get_object('info_gpu_usage_levelbar'))
+        self._info_encoder_usage_levelbar = cast(Gtk.LevelBar, self._builder.get_object('info_encoder_usage_levelbar'))
+        self._info_decoder_usage_levelbar = cast(Gtk.LevelBar, self._builder.get_object('info_decoder_usage_levelbar'))
+        self._temp_gpu_value = cast(Gtk.Label, self._builder.get_object('temp_gpu_value'))
+        self._temp_max_gpu_value = cast(Gtk.Label, self._builder.get_object('temp_max_gpu_value'))
+        self._temp_slowdown_value = cast(Gtk.Label, self._builder.get_object('temp_slowdown_value'))
+        self._temp_shutdown_value = cast(Gtk.Label, self._builder.get_object('temp_shutdown_value'))
+        self._fan_duty: Tuple[Gtk.Label, Gtk.Label, Gtk.Label, Gtk.Label, Gtk.Label,] = (
+            cast(Gtk.Label, self._builder.get_object('fan_duty_0')),
+            cast(Gtk.Label, self._builder.get_object('fan_duty_1')),
+            cast(Gtk.Label, self._builder.get_object('fan_duty_2')),
+            cast(Gtk.Label, self._builder.get_object('fan_duty_3')),
+            cast(Gtk.Label, self._builder.get_object('fan_duty_4')),
         )
-        self._fan_rpm: Tuple = (
-            self._builder.get_object('fan_rpm_0'),
-            self._builder.get_object('fan_rpm_1'),
-            self._builder.get_object('fan_rpm_2'),
-            self._builder.get_object('fan_rpm_3'),
-            self._builder.get_object('fan_rpm_4')
+        self._fan_rpm: Tuple[Gtk.Label, Gtk.Label, Gtk.Label, Gtk.Label, Gtk.Label,] = (
+            cast(Gtk.Label, self._builder.get_object('fan_rpm_0')),
+            cast(Gtk.Label, self._builder.get_object('fan_rpm_1')),
+            cast(Gtk.Label, self._builder.get_object('fan_rpm_2')),
+            cast(Gtk.Label, self._builder.get_object('fan_rpm_3')),
+            cast(Gtk.Label, self._builder.get_object('fan_rpm_4'))
         )
-        self._fan_warning_label: Gtk.Label = self._builder.get_object('fan_warning_label')
-        self._overclock_warning_label: Gtk.Label = self._builder.get_object('overclock_warning_label')
-        self._fan_profile_frame: Gtk.Frame = self._builder.get_object('fan_profile_frame')
-        self._overclock_frame: Gtk.Frame = self._builder.get_object('overclock_frame')
-        self._power_limit_scale: Gtk.Scale = self._builder.get_object('power_limit_scale')
-        self._power_limit_adjustment: Gtk.Adjustment = self._builder.get_object('power_limit_adjustment')
-        self._fan_apply_button: Gtk.Button = self._builder.get_object('fan_apply_button')
-        self._overclock_apply_button: Gtk.Button = self._builder.get_object('overclock_apply_button')
-        self._power_limit_apply_button: Gtk.Button = self._builder.get_object('power_limit_apply_button')
-        self._fan_liststore: Gtk.ListStore = self._builder.get_object('fan_profile_liststore')
-        self._overclock_liststore: Gtk.ListStore = self._builder.get_object('overclock_profile_liststore')
-        self._fan_combobox: Gtk.ComboBox = self._builder.get_object('fan_profile_combobox')
-        self._overclock_combobox: Gtk.ComboBox = self._builder.get_object('overclock_profile_combobox')
-        fan_scrolled_window: Gtk.ScrolledWindow = self._builder.get_object('fan_scrolled_window')
-        self._fan_edit_button: Gtk.Button = self._builder.get_object('fan_edit_button')
-        self._overclock_edit_button: Gtk.Button = self._builder.get_object('overclock_edit_button')
+        self._fan_warning_label = cast(Gtk.Label, self._builder.get_object('fan_warning_label'))
+        self._overclock_warning_label = cast(Gtk.Label, self._builder.get_object('overclock_warning_label'))
+        self._fan_profile_frame = cast(Gtk.Frame, self._builder.get_object('fan_profile_frame'))
+        self._overclock_frame = cast(Gtk.Frame, self._builder.get_object('overclock_frame'))
+        self._power_limit_scale = cast(Gtk.Scale, self._builder.get_object('power_limit_scale'))
+        self._power_limit_adjustment = cast(Gtk.Adjustment, self._builder.get_object('power_limit_adjustment'))
+        self._fan_apply_button = cast(Gtk.Button, self._builder.get_object('fan_apply_button'))
+        self._overclock_apply_button = cast(Gtk.Button, self._builder.get_object('overclock_apply_button'))
+        self._power_limit_apply_button = cast(Gtk.Button, self._builder.get_object('power_limit_apply_button'))
+        self._fan_liststore = cast(Gtk.ListStore, self._builder.get_object('fan_profile_liststore'))
+        self._overclock_liststore = cast(Gtk.ListStore, self._builder.get_object('overclock_profile_liststore'))
+        self._fan_combobox = cast(Gtk.ComboBox, self._builder.get_object('fan_profile_combobox'))
+        self._overclock_combobox = cast(Gtk.ComboBox, self._builder.get_object('overclock_profile_combobox'))
+        fan_scrolled_window = cast(Gtk.ScrolledWindow, self._builder.get_object('fan_scrolled_window'))
+        self._fan_edit_button = cast(Gtk.Button, self._builder.get_object('fan_edit_button'))
+        self._overclock_edit_button = cast(Gtk.Button, self._builder.get_object('overclock_edit_button'))
         self._init_plot_charts(fan_scrolled_window)
 
     def _init_about_dialog(self) -> None:
