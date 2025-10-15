@@ -18,10 +18,24 @@
 # Based on deprecated library 'Dazzle', dzl-graph-column copyrighted by
 #    Christian Hergert
 #
-from typing import Any, Generic, List, Set, TypeVar
+import sys
+import typing
 from collections import deque
+from typing import Any, Generic, TypeVar
 
-T = TypeVar('T')
+# silence type error with deque
+if sys.version_info >= (3, 10):
+    from typing import TypeAlias
+else:
+    from typing_extensions import TypeAlias
+
+if typing.TYPE_CHECKING:
+    from _typeshed import SupportsRichComparison
+else:
+    SupportsRichComparison: TypeAlias = Any
+
+
+T = TypeVar('T', bound=SupportsRichComparison)
 class GraphColumn(Generic[T]):
     name: str
 
@@ -49,13 +63,13 @@ class GraphColumn(Generic[T]):
         if len(self._values) == 0:
             raise RuntimeError("No samples in column")
         # dequeue can be iterated, but type checkers don't seem to think so
-        return max(self._values) # type: ignore [type-var]
+        return max(self._values)
 
     def min_value(self) -> T:
         if len(self._values) == 0:
             raise RuntimeError("No samples in column")
         # dequeue can be iterated, but type checkers don't seem to think so
-        return min(self._values) # type: ignore [type-var]
+        return min(self._values)
 
 
     def get_value(self, index: int) -> T:

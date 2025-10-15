@@ -20,7 +20,7 @@
 #
 
 from math import e
-from typing import Iterable, List, Optional
+from typing import Iterable, List, Optional, cast
 
 from gi.repository import GLib, GObject
 from gi.repository.GObject import SignalFlags
@@ -91,7 +91,7 @@ class GraphModelIter():
         col = self._table._columns[column]
         if len(col) == 0:
             raise RuntimeError("No samples in model")
-        return col.get_value(self._index)
+        return cast(float, col.get_value(self._index))
 
     def set_value(self, column: int, value: float) -> None:
         """Sets an individual value within a specific column
@@ -213,7 +213,7 @@ class GraphModel(GObject.GObject):
         if column >= len(self._columns) or column < 0:
             raise ValueError("Invalid Argument: column out of range")
         col = self._columns[column]
-        return col.max_value()
+        return cast(float, col.max_value())
 
     def get_column_min(self, column: int) -> float:
         if len(self._timestamps) == 0:
@@ -221,7 +221,7 @@ class GraphModel(GObject.GObject):
         if column >= len(self._columns) or column < 0:
             raise ValueError("Invalid Argument: column out of range")
         col = self._columns[column]
-        return col.min_value()
+        return cast(float, col.min_value())
 
 
     def get_iter_last(self) -> GraphModelIter:
@@ -238,11 +238,11 @@ class GraphModel(GObject.GObject):
     def get_end_time(self) -> int:
         if len(self._timestamps) != 0:
             # Safe to access [-1] since we checked length above
-            return self._timestamps[-1]
+            return cast(int, self._timestamps[-1])
         else:
             return GLib.get_monotonic_time()
 
-    def _check_min_max(self, val) -> None:
+    def _check_min_max(self, val: float) -> None:
         """update max and min values if `val` is outside of it"""
         if val > self._value_max:
             self.value_max = val
