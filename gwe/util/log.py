@@ -33,5 +33,4 @@ def set_log_level(level: int) -> None:
     logging.getLogger("reactivex").setLevel(logging.INFO)
     logging.getLogger('injector').setLevel(logging.INFO)
     logging.getLogger('peewee').setLevel(logging.INFO)
-    logging.getLogger('matplotlib').setLevel(logging.INFO)
     logging.getLogger('requests').setLevel(logging.INFO)

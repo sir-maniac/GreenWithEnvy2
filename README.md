@@ -128,8 +128,6 @@ sudo apt install python3 python3-pip libgirepository1.0-dev gir1.2-ayatanaappind
 
 plus all the Python dependencies listed in [requirements.txt](requirements.txt)
 
-For Debian (with KDE-Plasma) we have to use `--break-system-packages`. However, this will break things. Currently only matplotlib.
-Then we have to use `sudo pip3 uninstall matplotlib` and then `sudo apt reinstall python3-matplotlib`
 #### It is recommended to use the flatpak version for Debian.
 
 #### Clone project and install

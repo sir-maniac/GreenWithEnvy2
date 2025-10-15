@@ -16,20 +16,19 @@
 # along with gwe.  If not, see <http://www.gnu.org/licenses/>.
 import logging
 from collections import OrderedDict
-from typing import Optional, Dict
+from typing import Optional, Dict, cast
 
 from gi.repository import Gtk
 from injector import singleton, inject
-from matplotlib.backends.backend_gtk3agg import FigureCanvasGTK3Agg as FigureCanvas
-from matplotlib.figure import Figure
 
 from gwe.conf import MIN_TEMP, FAN_MIN_DUTY, MAX_TEMP, FAN_MAX_DUTY
 from gwe.di import EditFanProfileBuilder
 from gwe.interactor.settings_interactor import SettingsInteractor
 from gwe.presenter.edit_fan_profile_presenter import EditFanProfileViewInterface, EditFanProfilePresenter
-from gwe.util.view import init_plot_chart, get_fan_profile_data
+from gwe.util.view import get_fan_profile_data
 from gwe.model.fan_profile import FanProfile
 from gwe.model.speed_step import SpeedStep
+from gwe.view.fan_profile_chart import FanProfileChart
 
 _LOG = logging.getLogger(__name__)
 
@@ -82,27 +81,13 @@ class EditFanProfileView(EditFanProfileViewInterface):
 
     # pylint: disable=attribute-defined-outside-init
     def _init_plot_charts(self, ) -> None:
-        self._chart_figure = Figure(figsize=(8, 6), dpi=72, facecolor='#00000000')
-        self._chart_canvas = FigureCanvas(self._chart_figure)  # a Gtk.DrawingArea+
-        self._chart_axis = self._chart_figure.add_subplot(111)
-        self._growing_line, self._decreasing_line = init_plot_chart(
-            self._builder.get_object('scrolled_window'),
-            self._chart_figure,
-            self._chart_canvas,
-            self._chart_axis
-        )
+        scrolled_window = cast(Gtk.ScrolledWindow, self._builder.get_object('scrolled_window'))
+        self._fan_chart = FanProfileChart()
+        scrolled_window.add_with_viewport(self._fan_chart) # type: ignore [attr-defined] # missing in stub
 
     def _plot_chart(self, data: Dict[int, int]) -> None:
-        sorted_data = OrderedDict(sorted(data.items()))
-        temperature_list = list(sorted_data.keys())
-        duty_list = list(sorted_data.values())
         hysteresis = self._settings_interactor.get_int('settings_hysteresis')
-        self._growing_line.set_xdata(temperature_list)
-        self._growing_line.set_ydata(duty_list)
-        self._decreasing_line.set_xdata([t - hysteresis for t in temperature_list])
-        self._decreasing_line.set_ydata(duty_list)
-        self._chart_canvas.draw()
-        self._chart_canvas.flush_events()
+        self._fan_chart.set_data(data, hysteresis)
 
     def show(self, profile: FanProfile) -> None:
         self._treeselection.unselect_all()

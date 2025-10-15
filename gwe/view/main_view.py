@@ -27,12 +27,11 @@ from typing import Optional, Dict, List, Tuple, Any, cast
 
 from injector import inject, singleton
 from gi.repository import Gtk
-from matplotlib.figure import Figure
-from matplotlib.backends.backend_gtk3agg import FigureCanvasGTK3Agg as FigureCanvas
 
 from gwe.interactor.settings_interactor import SettingsInteractor
 from gwe.model.fan_profile import FanProfile
 from gwe.model.gpu_status import GpuStatus
+from gwe.view.fan_profile_chart import FanProfileChart
 _LOG = logging.getLogger(__name__)
 
 HAS_MODULE_INDICATOR: bool
@@ -56,7 +55,7 @@ except (ImportError, ValueError):
 
 from gwe.di import MainBuilder
 from gwe.view.edit_fan_profile_view import EditFanProfileView
-from gwe.util.view import hide_on_delete, init_plot_chart, get_fan_profile_data
+from gwe.util.view import hide_on_delete, get_fan_profile_data
 from gwe.view.edit_overclock_profile_view import EditOverclockProfileView
 from gwe.view.historical_data_view import HistoricalDataView
 from gwe.view.preferences_view import PreferencesView
@@ -65,6 +64,7 @@ from gwe.presenter.main_presenter import MainPresenter, MainViewInterface
 
 if not HAS_MODULE_INDICATOR:
     _LOG.warning("AppIndicator3 is not installed. The App indicator will not be shown.")
+
 
 
 @singleton
@@ -409,24 +409,11 @@ class MainView(MainViewInterface):
 
     # pylint: disable=attribute-defined-outside-init
     def _init_plot_charts(self, fan_scrolled_window: Gtk.ScrolledWindow) -> None:
-        self._fan_figure = Figure(figsize=(8, 6), dpi=72, facecolor='#00000000')
-        self._fan_canvas = FigureCanvas(self._fan_figure)  # a Gtk.DrawingArea+
-        self._fan_axis = self._fan_figure.add_subplot(111)
-        self._fan_growing_line, self._fan_decreasing_line = init_plot_chart(
-            fan_scrolled_window,
-            self._fan_figure,
-            self._fan_canvas,
-            self._fan_axis
-        )
+        self._fan_chart = FanProfileChart()
+        fan_scrolled_window.add_with_viewport(self._fan_chart) # type: ignore [attr-defined] # missing in stub
 
     def _plot_chart(self, data: Dict[int, int]) -> None:
-        sorted_data = OrderedDict(sorted(data.items()))
-        temperature_list = list(sorted_data.keys())
-        duty_list = list(sorted_data.values())
         hysteresis = self._settings_interactor.get_int('settings_hysteresis')
-        self._fan_growing_line.set_xdata(temperature_list)
-        self._fan_growing_line.set_ydata(duty_list)
-        self._fan_decreasing_line.set_xdata([t - hysteresis for t in temperature_list])
-        self._fan_decreasing_line.set_ydata(duty_list)
-        self._fan_canvas.draw()
-        self._fan_canvas.flush_events()
+        self._fan_chart.set_data(data, hysteresis)
+
+

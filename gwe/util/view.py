@@ -17,10 +17,6 @@
 
 from typing import Optional, Any, Dict, Tuple
 from gi.repository import Gio, GLib, Gtk, Gdk
-from matplotlib.axes import Axes
-from matplotlib.backends.backend_gtk3agg import FigureCanvasGTK3Agg as FigureCanvas
-from matplotlib.colors import ColorConverter
-from matplotlib.figure import Figure
 
 from gwe.conf import MIN_TEMP, MAX_TEMP, FAN_MAX_DUTY, GRAPH_COLOR_HEX
 from gwe.model.fan_profile import FanProfile
@@ -55,60 +51,6 @@ def rgba_to_hex(color: Gdk.RGBA) -> str:
                                                   int(color.green * 255),
                                                   int(color.blue * 255),
                                                   int(color.alpha * 255))
-
-
-def init_plot_chart(scrolled_window: Gtk.ScrolledWindow,
-                    figure: Figure,
-                    canvas: FigureCanvas,
-                    axis: Axes) -> Tuple:
-    axis.patch.set_visible(False)
-    temp_window = Gtk.Window()
-    style = temp_window.get_style_context()
-    bg_colour = style.get_background_color(Gtk.StateType.NORMAL).to_color().to_floats()
-    cc = ColorConverter()
-    cc.to_rgba(bg_colour)
-    figure.patch.set_facecolor(bg_colour)
-
-    axis.grid(True, linestyle=':')
-    axis.margins(x=0, y=0.05)
-
-    temp_label = Gtk.Label()
-    scrolled_window.add(temp_label)
-    text_color = rgba_to_hex(temp_label.get_style_context().get_color(Gtk.StateType.NORMAL))
-    text_color_alpha = text_color[:-2] + '80'
-    scrolled_window.remove(temp_label)
-    axis.set_xlabel('Temperature [°C]', color=text_color)
-    axis.set_ylabel('Duty [%]', color=text_color)
-    axis.tick_params(colors=text_color, grid_color=text_color_alpha)
-    for spine in axis.spines.values():
-        spine.set_edgecolor(text_color_alpha)
-    figure.subplots_adjust(top=1)
-    canvas.set_size_request(400, 300)
-    scrolled_window.add_with_viewport(canvas)
-    # Returns a tuple of line objects, thus the comma
-    growing_line = axis.plot(
-        [],
-        [],
-        'o-',
-        linewidth=3.0,
-        markersize=10,
-        antialiased=True,
-        color=GRAPH_COLOR_HEX
-    )
-    decreasing_line = axis.plot(
-        [],
-        [],
-        ':',
-        linewidth=2.0,
-        antialiased=True,
-        color=GRAPH_COLOR_HEX,
-        alpha=0.66
-    )
-    axis.set_ybound(lower=-5, upper=105)
-    axis.set_xbound(MIN_TEMP, MAX_TEMP)
-    figure.canvas.draw()
-    return growing_line[0], decreasing_line[0]
-
 
 def get_fan_profile_data(profile: FanProfile) -> Dict[int, int]:
     data = {p.temperature: p.duty for p in profile.steps}
