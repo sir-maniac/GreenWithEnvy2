@@ -327,19 +327,11 @@ class NvidiaRepository:
         return error
 
     @staticmethod
-    def _nvml_get_val(a_function: Callable[..., Union[str, T]],
+    def _nvml_get_val(a_function: Callable[..., T],
                       /,
                       *args: Any,
                       **kwargs: Any) -> Optional[T]:
         try:
-            # manage the peculiarity of all pynvml functions returning a
-            # possible string, even if the original function doesn't
-            #
-            # For the type checker, I can remove the `str` type from the
-            #  return type by specifying it in the Callable[] definition
-            #  because unions are flattened when nested
-
-            # I don't know why MyPy says cast() is returning Any
             return cast(Optional[T], a_function(*args, **kwargs))
 
         except NVMLError as err:
