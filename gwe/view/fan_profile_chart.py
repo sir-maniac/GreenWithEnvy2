@@ -30,6 +30,7 @@ class FanProfileChart(Gtk.DrawingArea):
         self._data: Dict[int, int] = {}
         self._hysteresis = 0
         self.set_size_request(400, 300)
+        self.set_margin_end(20)
         self.connect("draw", self._on_draw)
 
         self._plot_colour = Gdk.RGBA()
@@ -110,14 +111,15 @@ class FanProfileChart(Gtk.DrawingArea):
                    margin_right: int) -> None:
         """Draw the grid lines and labels."""
 
-        cr.set_source_rgba(colour.red, colour.green, colour.blue, 0.5)
-        cr.set_line_width(0.5)
+        cr.set_source_rgba(colour.red, colour.green, colour.blue, 0.8)
+        cr.set_line_width(1)
 
         # Vertical grid lines (temperature)
         bottom = height - margin_bottom
         h_segment = float(chart_width) / 5
 
-        def temp_line(i: int) -> None:
+        cr.set_dash([1, 1])
+        for i in range(1,6):
             x = margin_left + (i * h_segment)
             cr.move_to(x, margin_top)
             cr.line_to(x, bottom)
@@ -131,34 +133,18 @@ class FanProfileChart(Gtk.DrawingArea):
             cr.move_to(x - extents.width / 2, bottom + 15)
             cr.show_text(text)
 
-        # first line solid
-        temp_line(0)
-
-        # other lines dashes
-        cr.set_dash([1, 0, 0])
-        for i in range(1,6):
-            temp_line(i)
-
-        # base horizontal line
-        cr.set_dash([])
-        cr.move_to(margin_left, bottom)
-        cr.line_to(width - margin_right, bottom)
-        cr.stroke()
-
         # add a small margin to top and bottom
         inner_height = chart_height - vertical_padding * 2
         inner_bottom = bottom - vertical_padding
         v_segment = inner_height / 5
 
-        cr.set_dash([1, 0, 0])
+        cr.set_dash([1, 1])
         # Horizontal grid lines (duty)
         for i in range(6):
             y = inner_bottom - (i * v_segment)
             cr.move_to(margin_left, y)
             cr.line_to(width - margin_right, y)
-            cr.set_dash([1, 0, 0])
             cr.stroke()
-            cr.set_dash([])
 
             # Draw duty labels
             duty_value = i * 20
@@ -167,6 +153,8 @@ class FanProfileChart(Gtk.DrawingArea):
             extents = cr.text_extents(text)
             cr.move_to(margin_left - extents.width - 5, y + extents.height / 2)
             cr.show_text(text)
+
+        cr.set_dash([])
 
         # Draw axes
         cr.set_line_width(2)
