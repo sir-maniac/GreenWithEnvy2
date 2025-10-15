@@ -28,7 +28,7 @@ from gwe.presenter.edit_fan_profile_presenter import EditFanProfileViewInterface
 from gwe.util.view import get_fan_profile_data
 from gwe.model.fan_profile import FanProfile
 from gwe.model.speed_step import SpeedStep
-from gwe.view.fan_profile_chart import FanProfileChart
+from .widget.fan_profile_chart import FanProfileChart
 
 _LOG = logging.getLogger(__name__)
 

@@ -31,7 +31,7 @@ from gi.repository import Gtk
 from gwe.interactor.settings_interactor import SettingsInteractor
 from gwe.model.fan_profile import FanProfile
 from gwe.model.gpu_status import GpuStatus
-from gwe.view.fan_profile_chart import FanProfileChart
+from .widget.fan_profile_chart import FanProfileChart
 _LOG = logging.getLogger(__name__)
 
 HAS_MODULE_INDICATOR: bool
