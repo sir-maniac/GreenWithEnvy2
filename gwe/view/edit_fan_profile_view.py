@@ -51,30 +51,30 @@ class EditFanProfileView(EditFanProfileViewInterface):
         self._init_widgets()
 
     def _init_widgets(self) -> None:
-        self._dialog: Gtk.Dialog = self._builder.get_object('dialog')
-        self._delete_profile_button: Gtk.Button = self._builder \
-            .get_object('delete_profile_button')
-        self._profile_name_entry: Gtk.Entry = self._builder \
-            .get_object('profile_name_entry')
-        self._liststore: Gtk.ListStore = self._builder.get_object('liststore')
-        self._vbios_silent_mode: Gtk.CheckButton = self._builder \
-            .get_object("vbios_silent_mode")
-        self._temperature_adjustment: Gtk.Adjustment = self._builder \
-            .get_object('temperature_adjustment')
-        self._duty_adjustment: Gtk.Adjustment = self._builder \
-            .get_object('duty_adjustment')
-        self._temperature_scale: Gtk.Scale = self._builder \
-            .get_object('temperature_scale')
-        self._duty_scale: Gtk.Scale = self._builder \
-            .get_object('duty_scale')
-        self._controls_grid: Gtk.Grid = self._builder.get_object('controls_grid')
-        self._treeselection: Gtk.TreeSelection = self._builder.get_object('treeselection')
-        self._treeview: Gtk.TreeView = self._builder.get_object('treeview')
-        self._add_step_button: Gtk.Button = self._builder.get_object('add_step_button')
-        self._save_step_button: Gtk.Button = self._builder \
-            .get_object('save_step_button')
-        self._delete_step_button: Gtk.Button = self._builder \
-            .get_object('delete_step_button')
+        self._dialog = cast(Gtk.Dialog, self._builder.get_object('dialog'))
+        self._delete_profile_button = cast(Gtk.Button, self._builder \
+            .get_object('delete_profile_button'))
+        self._profile_name_entry = cast(Gtk.Entry, self._builder \
+            .get_object('profile_name_entry'))
+        self._liststore = cast(Gtk.ListStore, self._builder.get_object('liststore'))
+        self._vbios_silent_mode = cast(Gtk.CheckButton, self._builder \
+            .get_object("vbios_silent_mode"))
+        self._temperature_adjustment = cast(Gtk.Adjustment, self._builder \
+            .get_object('temperature_adjustment'))
+        self._duty_adjustment = cast(Gtk.Adjustment, self._builder \
+            .get_object('duty_adjustment'))
+        self._temperature_scale = cast(Gtk.Scale, self._builder \
+            .get_object('temperature_scale'))
+        self._duty_scale = cast(Gtk.Scale, self._builder \
+            .get_object('duty_scale'))
+        self._controls_grid = cast(Gtk.Grid, self._builder.get_object('controls_grid'))
+        self._treeselection = cast(Gtk.TreeSelection, self._builder.get_object('treeselection'))
+        self._treeview = cast(Gtk.TreeView, self._builder.get_object('treeview'))
+        self._add_step_button = cast(Gtk.Button, self._builder.get_object('add_step_button'))
+        self._save_step_button = cast(Gtk.Button, self._builder \
+            .get_object('save_step_button'))
+        self._delete_step_button = cast(Gtk.Button, self._builder \
+            .get_object('delete_step_button'))
         self._init_plot_charts()
 
     def set_transient_for(self, window: Gtk.Window) -> None:
