@@ -23,8 +23,8 @@ import cairo
 
 from gi.repository import GObject, Gdk
 
-from gwe.graph.graph_model import GraphModel, GraphModelIter
-from gwe.graph.graph_renderer import GraphRenderer
+from ..model.graph_model import GraphModel, GraphModelIter
+from .widget.graph_renderer import GraphRenderer
 
 
 class GraphStackedRenderer(GraphRenderer):

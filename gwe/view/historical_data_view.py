@@ -28,8 +28,8 @@ from gwe.di import HistoricalDataBuilder
 from gwe.model.clocks import Clocks
 from gwe.presenter.historical_data_presenter import GRAPH_INIT, HistoricalDataViewInterface, HistoricalDataPresenter, MONITORING_INTERVAL, \
     GraphType
-from gwe.graph.graph_model import GraphModel
-from gwe.graph.graph_view import GraphView
+from ..model.graph_model import GraphModel
+from .widget.graph_view import GraphView
 from gwe.repository.nvidia_repository import NvidiaRepository
 from gwe.view.graph_stacked_renderer_view import GraphStackedRenderer
 

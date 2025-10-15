@@ -1,6 +1,6 @@
 import pytest
-from gwe.graph.graph_model import GraphModel, GraphModelIter, USEC_PER_SEC
-from gwe.graph.graph_column import GraphColumn
+from gwe.model.graph_model import GraphModel, GraphModelIter, USEC_PER_SEC
+from gwe.model.graph_column import GraphColumn
 from gi.repository import GLib
 
 class DummyValue:

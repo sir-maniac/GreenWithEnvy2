@@ -26,7 +26,7 @@ import typing
 import cairo
 from gi.repository.Gdk import RGBA
 from gi.repository import Gdk
-from .graph_model import GraphModel, GraphModelIter
+from ...model.graph_model import GraphModel, GraphModelIter
 
 class GraphRenderer(metaclass=ABCMeta):
     @abstractmethod

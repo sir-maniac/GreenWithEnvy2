@@ -1,6 +1,6 @@
 import pytest
 from collections import deque
-from gwe.graph.graph_column import GraphColumn
+from gwe.model.graph_column import GraphColumn
 
 def test_graph_column_init() -> None:
     col = GraphColumn[int]("Test", 5)

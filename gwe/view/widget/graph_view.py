@@ -24,7 +24,7 @@ from typing import Any, List, Optional, cast
 import cairo
 from gi.repository import GObject, Gdk, Gtk, GLib
 from gi.repository.GLib import SOURCE_CONTINUE, SOURCE_REMOVE
-from .graph_model import GraphModel
+from ...model.graph_model import GraphModel
 from .graph_renderer import GraphRenderer
 
 
