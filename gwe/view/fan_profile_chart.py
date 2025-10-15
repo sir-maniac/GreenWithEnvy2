@@ -56,7 +56,7 @@ class FanProfileChart(Gtk.DrawingArea):
         # Clear background
         Gtk.render_background(style, cr, 0, 0, width, height)
 
-        fg_colour: Gdk.RGBA = cast(Gdk.RGBA, style.get_color(Gtk.StateType.NORMAL))
+        fg_colour: Gdk.RGBA = cast(Gdk.RGBA, style.get_color(Gtk.StateType.NORMAL)) # type:ignore [call-arg, attr-defined] # incorrect stub
 
         # Chart margins
         margin_left = 60
