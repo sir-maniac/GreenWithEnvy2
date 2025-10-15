@@ -14,7 +14,6 @@ pkgs.mkShell {
   packages = with pkgs; [
     (python3.withPackages (pypkgs: with pypkgs; [
       injector
-      matplotlib
       packaging
       peewee
       pynvml
