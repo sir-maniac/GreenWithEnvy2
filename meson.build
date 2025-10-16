@@ -24,8 +24,11 @@ endif
 message('Python binary: ', py_installation.full_path())
 message('Package install path: ', py_installation.get_install_dir())
 
-find_result = run_command('find', 'gwe', '!', '-type', 'd', check: true)
+find_result = run_command(
+  'find', 'gwe', '-iname', '*.py',
+  check: true)
 sources = find_result.stdout().strip().split('\n')
+message('sources: ', sources)
 
 # Dependencies
 dependency('gobject-introspection-1.0', version: '>= 1.56.0')
