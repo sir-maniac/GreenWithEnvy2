@@ -88,7 +88,7 @@ elif [[ ${FLATPAK_BUNDLE} -eq 1 ]]; then
 else
 	[[ -d ${MESON_BUILD_DIR} ]] && rm -rfv ${MESON_BUILD_DIR}
 	mkdir -pv ${MESON_BUILD_DIR} ${INSTALL_DIR} && \
-	meson . ${MESON_BUILD_DIR} --prefix=$PWD/${INSTALL_DIR} && \
+	meson setup . ${MESON_BUILD_DIR} --prefix=$PWD/${INSTALL_DIR} && \
 	ninja -v -C ${MESON_BUILD_DIR} && \
 	desktop-file-validate build/meson/data/com.leinardi.gwe.desktop && \
 	ninja -v -C ${MESON_BUILD_DIR} install
