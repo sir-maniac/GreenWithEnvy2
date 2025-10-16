@@ -26,28 +26,23 @@ sys.path.insert(1, '@PYTHON_DIR@')
 
 VERSION = '@VERSION@'
 PKGDATA_DIR = '@PKGDATA_DIR@'
+ICON_PATH = '@ICON_PATH@'
 localedir = '@localedir@'
+
 builddir = os.environ.get('MESON_BUILD_ROOT')
 if builddir:
     PKGDATA_DIR = os.path.join(builddir, 'data')
+    sourcedir = os.environ.get('MESON_SOURCE_ROOT')
+    ICON_PATH = os.path.join(sourcedir, 'data/icons')
+
     os.environ['GSETTINGS_SCHEMA_DIR'] = PKGDATA_DIR
     sys.dont_write_bytecode = True
-    sys.path.insert(1, os.environ['MESON_SOURCE_ROOT'])
+    sys.path.insert(1, sourcedir)
 
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 
 # gettext.install('trg', localedir)
 
 if __name__ == '__main__':
-    import gi
-
-    gi.require_version('Gtk', '3.0')
-    gi.require_version('Gdk', '3.0')
-    gi.require_version('Notify', '0.7')
-
-    from gi.repository import Gio
-    resource = Gio.Resource.load(os.path.join(PKGDATA_DIR, 'com.leinardi.gwe.gresource'))
-    resource._register()
-
     from gwe import __main__
-    __main__.main()
+    __main__.main(PKGDATA_DIR, ICON_PATH)

@@ -17,11 +17,13 @@
 
 import logging
 import os
+from pathlib import Path
 import shutil
 from typing import NewType
+from xdg import BaseDirectory
 
-from gi.repository import Gtk
-from injector import Binder, Injector, Module, provider, singleton
+from gi.repository import Gio, Gtk
+from injector import Binder, Module, provider, singleton
 from peewee import BooleanField, SqliteDatabase
 from playhouse.migrate import SqliteMigrator, migrate
 from reactivex.disposable import CompositeDisposable
@@ -29,7 +31,7 @@ from reactivex.subject import Subject
 
 from gwe.conf import (APP_DB_NAME, APP_DB_VERSION,
                       APP_EDIT_FAN_PROFILE_UI_NAME,
-                      APP_EDIT_OC_PROFILE_UI_NAME, APP_HISTORICAL_DATA_UI_NAME,
+                      APP_EDIT_OC_PROFILE_UI_NAME, APP_HISTORICAL_DATA_UI_NAME, APP_ID,
                       APP_MAIN_UI_NAME, APP_PACKAGE_NAME,
                       APP_PREFERENCES_UI_NAME)
 from gwe.model import fan_profile, overclock_profile, setting, speed_step
@@ -40,7 +42,7 @@ from gwe.model.overclock_profile import (OverclockProfile,
                                          OverclockProfileChangedSubject)
 from gwe.model.setting import Setting, SettingChangedSubject
 from gwe.model.speed_step import SpeedStep, SpeedStepChangedSubject
-from gwe.util.path import get_config_path
+from gwe.model.sys_paths import SysPaths
 from gwe.view.edit_fan_profile_view import EditFanProfileBuilder
 from gwe.view.edit_overclock_profile_view import EditOverclockProfileBuilder
 from gwe.view.historical_data_view import HistoricalDataBuilder
@@ -49,23 +51,40 @@ from gwe.view.preferences_view import PreferencesBuilder
 
 _LOG = logging.getLogger(__name__)
 
+PKGDATA_DIR: str  # set in gwe.__main__
+ICON_PATH: str # set in gwe.__main__
+
 _UI_RESOURCE_PATH = "/com/leinardi/gwe/ui/{}"
 
 
 # pylint: disable=no-self-use
 class ProviderModule(Module):
     def configure(self, binder: Binder) -> None:
-        db = self._create_database(get_config_path(APP_DB_NAME))
+        config_path = str(Path(BaseDirectory.save_config_path(APP_PACKAGE_NAME)))
+        sys_paths = SysPaths(PKGDATA_DIR, ICON_PATH, config_path)
+
+        db = self._create_database(sys_paths.get_config_path(APP_DB_NAME))
         fan_subject = FanProfileChangedSubject(Subject())
         speed_step_subject = SpeedStepChangedSubject(Subject())
         overclock_profile_subject =  OverclockProfileChangedSubject(Subject())
         setting_subject =  SettingChangedSubject(Subject())
 
+        binder.bind(SysPaths, sys_paths)
         binder.bind(SqliteDatabase, to=db)
         binder.bind(FanProfileChangedSubject, fan_subject)
         binder.bind(SpeedStepChangedSubject, speed_step_subject)
         binder.bind(OverclockProfileChangedSubject, overclock_profile_subject)
         binder.bind(SettingChangedSubject, setting_subject)
+
+        # These need to be initialized so builders can find their files.
+        # There might be a better place for this, but this seems a better place than the
+        #  the top-level `gwe` file.
+
+        resource = Gio.Resource.load(os.path.join(sys_paths.pkgdata_dir, f'{APP_ID}.gresource'))
+        resource._register()
+
+        icon_theme: Gtk.IconTheme = Gtk.IconTheme.get_default()
+        icon_theme.append_search_path(sys_paths.icon_path)
 
         # peewee's model fundamentally clashes with injection, requiring
         #  configuration at the class level, rather than at instance

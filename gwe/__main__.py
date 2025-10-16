@@ -27,9 +27,15 @@ from os.path import abspath, join, dirname
 
 from injector import Injector, inject
 from peewee import SqliteDatabase
-from gi.repository import GLib
 from reactivex.disposable import CompositeDisposable
 
+import gi
+gi.require_version('Gtk', '3.0')
+gi.require_version('Gdk', '3.0')
+gi.require_version('Notify', '0.7')
+from gi.repository import GLib
+
+from gwe import di
 from gwe.conf import APP_PACKAGE_NAME
 from gwe.model.current_fan_profile import CurrentFanProfile
 from gwe.model.current_overclock_profile import CurrentOverclockProfile
@@ -89,6 +95,7 @@ class GweLifetime:
         self.cleanup()
         sys.exit(1)
 
+
     def _init_database(self) -> None:
         self._database.create_tables([
             SpeedStep,
@@ -100,8 +107,11 @@ class GweLifetime:
         ])
 
 
-def main() -> int:
+def main(pkgdata_dir: str, icon_path: str) -> int:
     _LOG.debug("main")
+
+    di.PKGDATA_DIR = pkgdata_dir
+    di.ICON_PATH = icon_path
 
     injector = Injector([ProviderModule])
 
@@ -112,6 +122,3 @@ def main() -> int:
     lifetime.cleanup()
     return sys.exit(exit_status)
 
-
-if __name__ == "__main__":
-    main()

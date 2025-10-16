@@ -28,17 +28,5 @@ signal.signal(signal.SIGINT, signal.SIG_DFL)
 # gettext.install('trg', localedir)
 
 if __name__ == '__main__':
-    import gi
-
-    gi.require_version('Gtk', '3.0')
-    gi.require_version('Gdk', '3.0')
-    gi.require_version('Notify', '0.7')
-
-    from gi.repository import Gio
-
-    resource = Gio.Resource.load(str(PKGDATA_DIR / 'com.leinardi.gwe.gresource'))
-    resource._register()
-
     from gwe import __main__
-
-    __main__.main()
+    __main__.main(PKGDATA_DIR.as_posix(), ICON_PATH.as_posix())
