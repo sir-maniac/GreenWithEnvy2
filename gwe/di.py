@@ -15,25 +15,29 @@
 # You should have received a copy of the GNU General Public License
 # along with gwe.  If not, see <http://www.gnu.org/licenses/>.
 
-import os
 import logging
+import os
 import shutil
 from typing import NewType
 
 from gi.repository import Gtk
-from injector import Binder, Module, provider, singleton, Injector
-from peewee import SqliteDatabase, BooleanField
+from injector import Binder, Injector, Module, provider, singleton
+from peewee import BooleanField, SqliteDatabase
 from playhouse.migrate import SqliteMigrator, migrate
 from reactivex.disposable import CompositeDisposable
 from reactivex.subject import Subject
 
-from gwe.conf import APP_ID, APP_PACKAGE_NAME, APP_MAIN_UI_NAME, APP_DB_NAME, APP_EDIT_FAN_PROFILE_UI_NAME, \
-    APP_PREFERENCES_UI_NAME, APP_HISTORICAL_DATA_UI_NAME, APP_EDIT_OC_PROFILE_UI_NAME, APP_DB_VERSION
-from gwe.model import (fan_profile, overclock_profile, setting, speed_step)
+from gwe.conf import (APP_DB_NAME, APP_DB_VERSION,
+                      APP_EDIT_FAN_PROFILE_UI_NAME,
+                      APP_EDIT_OC_PROFILE_UI_NAME, APP_HISTORICAL_DATA_UI_NAME,
+                      APP_MAIN_UI_NAME, APP_PACKAGE_NAME,
+                      APP_PREFERENCES_UI_NAME)
+from gwe.model import fan_profile, overclock_profile, setting, speed_step
 from gwe.model.current_fan_profile import CurrentFanProfile
 from gwe.model.current_overclock_profile import CurrentOverclockProfile
 from gwe.model.fan_profile import FanProfile, FanProfileChangedSubject
-from gwe.model.overclock_profile import OverclockProfile, OverclockProfileChangedSubject
+from gwe.model.overclock_profile import (OverclockProfile,
+                                         OverclockProfileChangedSubject)
 from gwe.model.setting import Setting, SettingChangedSubject
 from gwe.model.speed_step import SpeedStep, SpeedStepChangedSubject
 from gwe.util.path import get_config_path
