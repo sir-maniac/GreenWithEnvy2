@@ -23,7 +23,7 @@
 
 import logging
 from collections import OrderedDict
-from typing import Optional, Dict, List, Tuple, Any, cast
+from typing import NewType, Optional, Dict, List, Tuple, Any, cast
 
 from injector import inject, singleton
 from gi.repository import Gtk
@@ -53,7 +53,6 @@ except (ImportError, ValueError):
     except (ImportError, ValueError):
         HAS_MODULE_INDICATOR = False
 
-from gwe.di import MainBuilder
 from gwe.view.edit_fan_profile_view import EditFanProfileView
 from gwe.util.view import hide_on_delete, get_fan_profile_data
 from gwe.view.edit_overclock_profile_view import EditOverclockProfileView
@@ -65,6 +64,7 @@ from gwe.presenter.main_presenter import MainPresenter, MainViewInterface
 if not HAS_MODULE_INDICATOR:
     _LOG.warning("AppIndicator3 is not installed. The App indicator will not be shown.")
 
+MainBuilder = NewType('MainBuilder', Gtk.Builder)
 
 
 @singleton

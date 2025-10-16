@@ -17,14 +17,13 @@
 from enum import Enum
 import time
 import logging
-from typing import Dict, Tuple, Any, cast
+from typing import Dict, NewType, Tuple, Any, cast
 
 from gi.repository import Gtk, GLib, Gdk, GObject
 from gi.repository.GObject import TYPE_DOUBLE
 from injector import singleton, inject
 
 from gwe.conf import GRAPH_COLOR_HEX
-from gwe.di import HistoricalDataBuilder
 from gwe.model.clocks import Clocks
 from gwe.presenter.historical_data_presenter import GRAPH_INIT, HistoricalDataViewInterface, HistoricalDataPresenter, MONITORING_INTERVAL, \
     GraphType
@@ -38,6 +37,8 @@ _LOG = logging.getLogger(__name__)
 GV_MIN_VALUE = 0
 GV_MAX_VALUE = 1
 GV_CUR_VALUE = 2
+
+HistoricalDataBuilder = NewType('HistoricalDataBuilder', Gtk.Builder)
 
 @singleton
 class HistoricalDataView(HistoricalDataViewInterface):

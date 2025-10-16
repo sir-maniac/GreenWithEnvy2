@@ -15,18 +15,21 @@
 # You should have received a copy of the GNU General Public License
 # along with gst.  If not, see <http://www.gnu.org/licenses/>.
 import logging
-from typing import Any
+from typing import Any, NewType
 
 from peewee import CharField, Check, BooleanField, DateTimeField, SQL, SqliteDatabase
 from playhouse.signals import Model, post_save, post_delete
 from playhouse.sqlite_ext import AutoIncrementField
+from reactivex import Subject
+from reactivex.subject import Subject
 
-from gwe.di import INJECTOR, FanProfileChangedSubject
 from gwe.model.cb_change import DbChange
 from gwe.model.fan_profile_type import FanProfileType
 
 _LOG = logging.getLogger(__name__)
-FAN_PROFILE_CHANGED_SUBJECT = INJECTOR.get(FanProfileChangedSubject)
+
+FanProfileChangedSubject = NewType('FanProfileChangedSubject', Subject)
+FAN_PROFILE_CHANGED_SUBJECT: FanProfileChangedSubject  # set in injector configuration
 
 
 class FanProfile(Model):
@@ -41,7 +44,7 @@ class FanProfile(Model):
 
     class Meta:
         legacy_table_names = False
-        database = INJECTOR.get(SqliteDatabase)
+        database: SqliteDatabase # set in injector configuration
 
 
 @post_save(sender=FanProfile)

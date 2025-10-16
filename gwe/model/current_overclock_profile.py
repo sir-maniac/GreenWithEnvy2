@@ -17,7 +17,6 @@
 from peewee import ForeignKeyField, DateTimeField, SQL, SqliteDatabase
 from playhouse.signals import Model
 
-from gwe.di import INJECTOR
 from gwe.model.overclock_profile import OverclockProfile
 
 
@@ -27,4 +26,4 @@ class CurrentOverclockProfile(Model):
 
     class Meta:
         legacy_table_names = False
-        database = INJECTOR.get(SqliteDatabase)
+        database: SqliteDatabase # set in injector configuration

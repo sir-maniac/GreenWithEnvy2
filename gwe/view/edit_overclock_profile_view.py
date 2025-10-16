@@ -15,17 +15,18 @@
 # You should have received a copy of the GNU General Public License
 # along with gwe.  If not, see <http://www.gnu.org/licenses/>.
 import logging
+from typing import NewType
 
 from gi.repository import Gtk
 from injector import singleton, inject
 
-from gwe.di import EditOverclockProfileBuilder
 from gwe.model.overclock_profile import OverclockProfile
 from gwe.model.overclock import Overclock
 from gwe.presenter.edit_overclock_profile_presenter import EditOverclockProfileViewInterface, \
     EditOverclockProfilePresenter
 
 _LOG = logging.getLogger(__name__)
+EditOverclockProfileBuilder = NewType('EditOverclockProfileBuilder', Gtk.Builder)
 
 
 @singleton

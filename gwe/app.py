@@ -23,7 +23,7 @@ from gettext import gettext as _
 from typing import Any, Optional, List
 from injector import inject, singleton
 from gwe.conf import APP_NAME, APP_ID, APP_VERSION, APP_ICON_NAME
-from gwe.di import MainBuilder
+from gwe.view.main_view import MainBuilder
 from gwe.model import load_fan_db_default_data, load_overclock_db_default_data
 from gwe.model.fan_profile import FanProfile
 from gwe.model.overclock_profile import OverclockProfile

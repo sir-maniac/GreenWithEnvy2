@@ -17,9 +17,7 @@
 from peewee import ForeignKeyField, DateTimeField, BooleanField, SQL, SqliteDatabase
 from playhouse.signals import Model
 
-from gwe.di import INJECTOR
 from gwe.model.fan_profile import FanProfile
-
 
 class CurrentFanProfile(Model):
     profile = ForeignKeyField(FanProfile, unique=True)
@@ -28,4 +26,4 @@ class CurrentFanProfile(Model):
 
     class Meta:
         legacy_table_names = False
-        database = INJECTOR.get(SqliteDatabase)
+        database: SqliteDatabase # set in injector configuration

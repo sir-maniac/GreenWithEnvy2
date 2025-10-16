@@ -30,8 +30,6 @@ from reactivex.scheduler import ThreadPoolScheduler
 from reactivex.scheduler.mainloop import GtkScheduler
 
 from gwe.conf import APP_NAME, APP_SOURCE_URL, APP_VERSION, APP_ID
-from gwe.di import FanProfileChangedSubject, SpeedStepChangedSubject, OverclockProfileChangedSubject, \
-    SettingChangedSubject
 from gwe.interactor.check_new_version_interactor import CheckNewVersionInteractor
 from gwe.interactor.get_status_interactor import GetStatusInteractor
 from gwe.interactor.has_nvidia_driver_interactor import HasNvidiaDriverInteractor, HasNvidiaDriverResult
@@ -39,15 +37,17 @@ from gwe.interactor.set_fan_speed_interactor import SetFanSpeedInteractor
 from gwe.interactor.set_overclock_interactor import SetOverclockInteractor
 from gwe.interactor.set_power_limit_iInteractor import SetPowerLimitInteractor
 from gwe.interactor.settings_interactor import SettingsInteractor
-from gwe.model import SpeedStep
+from gwe.model.speed_step import SpeedStep
 from gwe.model.cb_change import DbChange
 from gwe.model.current_fan_profile import CurrentFanProfile
 from gwe.model.current_overclock_profile import CurrentOverclockProfile
 from gwe.model.gpu_status import GpuStatus
-from gwe.model.setting import Setting
+from gwe.model.overclock_profile import OverclockProfileChangedSubject
+from gwe.model.setting import Setting, SettingChangedSubject
 from gwe.model.overclock_profile import OverclockProfile
-from gwe.model.fan_profile import FanProfile
+from gwe.model.fan_profile import FanProfile, FanProfileChangedSubject
 from gwe.model.fan_profile_type import FanProfileType
+from gwe.model.speed_step import SpeedStepChangedSubject
 from gwe.presenter.edit_fan_profile_presenter import EditFanProfilePresenter
 from gwe.presenter.edit_overclock_profile_presenter import EditOverclockProfilePresenter
 from gwe.presenter.historical_data_presenter import HistoricalDataPresenter

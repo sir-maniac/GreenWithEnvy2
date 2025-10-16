@@ -15,18 +15,20 @@
 # You should have received a copy of the GNU General Public License
 # along with gst.  If not, see <http://www.gnu.org/licenses/>.
 import logging
-from typing import Any
+from typing import Any, NewType
 
 from peewee import CharField, Check, IntegerField, BooleanField, DateTimeField, SQL, SqliteDatabase
 from playhouse.signals import Model, post_save, post_delete
 from playhouse.sqlite_ext import AutoIncrementField
+from reactivex import Subject
+from reactivex.subject import Subject
 
-from gwe.di import INJECTOR, OverclockProfileChangedSubject
 from gwe.model.cb_change import DbChange
 from gwe.model.overclock_profile_type import OverclockProfileType
 
 _LOG = logging.getLogger(__name__)
-OVERCLOCK_PROFILE_CHANGED_SUBJECT = INJECTOR.get(OverclockProfileChangedSubject)
+OverclockProfileChangedSubject = NewType('OverclockProfileChangedSubject', Subject)
+OVERCLOCK_PROFILE_CHANGED_SUBJECT: OverclockProfileChangedSubject # set in injector configuration
 
 
 class OverclockProfile(Model):
@@ -43,7 +45,7 @@ class OverclockProfile(Model):
 
     class Meta:
         legacy_table_names = False
-        database = INJECTOR.get(SqliteDatabase)
+        database: SqliteDatabase # set in injector configuration
 
 
 @post_save(sender=OverclockProfile)

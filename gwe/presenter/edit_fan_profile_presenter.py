@@ -21,8 +21,8 @@ from gi.repository import Gtk
 from injector import singleton, inject
 
 from gwe.conf import MIN_TEMP, FAN_MIN_DUTY
-from gwe.di import SettingChangedSubject
 from gwe.model.cb_change import DbChange
+from gwe.model.setting import SettingChangedSubject
 from gwe.util.view import hide_on_delete
 from gwe.model.fan_profile import FanProfile
 from gwe.model.speed_step import SpeedStep

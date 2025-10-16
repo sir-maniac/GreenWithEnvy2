@@ -15,12 +15,13 @@
 # You should have received a copy of the GNU General Public License
 # along with gst.  If not, see <http://www.gnu.org/licenses/>.
 import logging
-from typing import Any
+from typing import Any, NewType
 
 from peewee import ForeignKeyField, IntegerField, DateTimeField, SQL, SqliteDatabase
 from playhouse.signals import Model, post_save, post_delete
+from reactivex import Subject
+from reactivex.subject import Subject
 
-from gwe.di import INJECTOR, SpeedStepChangedSubject
 from gwe.model.cb_change import DbChange
 from gwe.model.fan_profile import FanProfile
 
@@ -35,7 +36,7 @@ class SpeedStep(Model):
 
     class Meta:
         legacy_table_names = False
-        database = INJECTOR.get(SqliteDatabase)
+        database: SqliteDatabase # set in injector configuration
 
 
 @post_save(sender=SpeedStep)
@@ -50,4 +51,5 @@ def on_speed_step_deleted(_: Any, step: SpeedStep) -> None:
     SPEED_STEP_CHANGED_SUBJECT.on_next(DbChange(step, DbChange.DELETE))
 
 
-SPEED_STEP_CHANGED_SUBJECT = INJECTOR.get(SpeedStepChangedSubject)
+SpeedStepChangedSubject = NewType('SpeedStepChangedSubject', Subject)
+SPEED_STEP_CHANGED_SUBJECT : SpeedStepChangedSubject # set in injector configuration

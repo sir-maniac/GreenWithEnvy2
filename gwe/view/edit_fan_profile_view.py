@@ -16,13 +16,12 @@
 # along with gwe.  If not, see <http://www.gnu.org/licenses/>.
 import logging
 from collections import OrderedDict
-from typing import Optional, Dict, cast
+from typing import NewType, Optional, Dict, cast
 
 from gi.repository import Gtk
 from injector import singleton, inject
 
 from gwe.conf import MIN_TEMP, FAN_MIN_DUTY, MAX_TEMP, FAN_MAX_DUTY
-from gwe.di import EditFanProfileBuilder
 from gwe.interactor.settings_interactor import SettingsInteractor
 from gwe.presenter.edit_fan_profile_presenter import EditFanProfileViewInterface, EditFanProfilePresenter
 from gwe.util.view import get_fan_profile_data
@@ -32,6 +31,7 @@ from .widget.fan_profile_chart import FanProfileChart
 
 _LOG = logging.getLogger(__name__)
 
+EditFanProfileBuilder = NewType('EditFanProfileBuilder', Gtk.Builder)
 
 @singleton
 class EditFanProfileView(EditFanProfileViewInterface):

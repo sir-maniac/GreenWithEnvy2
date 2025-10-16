@@ -21,33 +21,66 @@ import shutil
 from typing import NewType
 
 from gi.repository import Gtk
-from injector import Module, provider, singleton, Injector
+from injector import Binder, Module, provider, singleton, Injector
 from peewee import SqliteDatabase, BooleanField
 from playhouse.migrate import SqliteMigrator, migrate
 from reactivex.disposable import CompositeDisposable
 from reactivex.subject import Subject
 
-from gwe.conf import APP_PACKAGE_NAME, APP_MAIN_UI_NAME, APP_DB_NAME, APP_EDIT_FAN_PROFILE_UI_NAME, \
+from gwe.conf import APP_ID, APP_PACKAGE_NAME, APP_MAIN_UI_NAME, APP_DB_NAME, APP_EDIT_FAN_PROFILE_UI_NAME, \
     APP_PREFERENCES_UI_NAME, APP_HISTORICAL_DATA_UI_NAME, APP_EDIT_OC_PROFILE_UI_NAME, APP_DB_VERSION
+from gwe.model import (fan_profile, overclock_profile, setting, speed_step)
+from gwe.model.current_fan_profile import CurrentFanProfile
+from gwe.model.current_overclock_profile import CurrentOverclockProfile
+from gwe.model.fan_profile import FanProfile, FanProfileChangedSubject
+from gwe.model.overclock_profile import OverclockProfile, OverclockProfileChangedSubject
+from gwe.model.setting import Setting, SettingChangedSubject
+from gwe.model.speed_step import SpeedStep, SpeedStepChangedSubject
 from gwe.util.path import get_config_path
+from gwe.view.edit_fan_profile_view import EditFanProfileBuilder
+from gwe.view.edit_overclock_profile_view import EditOverclockProfileBuilder
+from gwe.view.historical_data_view import HistoricalDataBuilder
+from gwe.view.main_view import MainBuilder
+from gwe.view.preferences_view import PreferencesBuilder
 
 _LOG = logging.getLogger(__name__)
-
-SpeedStepChangedSubject = NewType('SpeedStepChangedSubject', Subject)
-FanProfileChangedSubject = NewType('FanProfileChangedSubject', Subject)
-OverclockProfileChangedSubject = NewType('OverclockProfileChangedSubject', Subject)
-SettingChangedSubject = NewType('SettingChangedSubject', Subject)
-MainBuilder = NewType('MainBuilder', Gtk.Builder)
-EditFanProfileBuilder = NewType('EditFanProfileBuilder', Gtk.Builder)
-EditOverclockProfileBuilder = NewType('EditOverclockProfileBuilder', Gtk.Builder)
-HistoricalDataBuilder = NewType('HistoricalDataBuilder', Gtk.Builder)
-PreferencesBuilder = NewType('PreferencesBuilder', Gtk.Builder)
 
 _UI_RESOURCE_PATH = "/com/leinardi/gwe/ui/{}"
 
 
 # pylint: disable=no-self-use
 class ProviderModule(Module):
+    def configure(self, binder: Binder) -> None:
+        db = self._create_database(get_config_path(APP_DB_NAME))
+        fan_subject = FanProfileChangedSubject(Subject())
+        speed_step_subject = SpeedStepChangedSubject(Subject())
+        overclock_profile_subject =  OverclockProfileChangedSubject(Subject())
+        setting_subject =  SettingChangedSubject(Subject())
+
+        binder.bind(SqliteDatabase, to=db)
+        binder.bind(FanProfileChangedSubject, fan_subject)
+        binder.bind(SpeedStepChangedSubject, speed_step_subject)
+        binder.bind(OverclockProfileChangedSubject, overclock_profile_subject)
+        binder.bind(SettingChangedSubject, setting_subject)
+
+        # peewee's model fundamentally clashes with injection, requiring
+        #  configuration at the class level, rather than at instance
+        #  construction. The best compromise I can think of is to set
+        #  configuration at injection time.
+
+        CurrentFanProfile._meta.database = db
+        CurrentOverclockProfile._meta.database = db
+        FanProfile._meta.database = db
+        OverclockProfile._meta.database = db
+        Setting._meta.database = db
+        SpeedStep._meta.database = db
+
+        fan_profile.FAN_PROFILE_CHANGED_SUBJECT = fan_subject
+        overclock_profile.OVERCLOCK_PROFILE_CHANGED_SUBJECT = overclock_profile_subject
+        setting.SPEED_STEP_CHANGED_SUBJECT = setting_subject
+        speed_step.SPEED_STEP_CHANGED_SUBJECT = speed_step_subject
+
+
     @singleton
     @provider
     def provide_main_builder(self) -> MainBuilder:
@@ -123,31 +156,4 @@ class ProviderModule(Module):
 
         return database
 
-    @singleton
-    @provider
-    def provide_database(self) -> SqliteDatabase:
-        _LOG.debug("provide SqliteDatabase")
-        return self._create_database(get_config_path(APP_DB_NAME))
 
-    @singleton
-    @provider
-    def provide_speed_step_changed_subject(self) -> SpeedStepChangedSubject:
-        return SpeedStepChangedSubject(Subject())
-
-    @singleton
-    @provider
-    def provide_fan_profile_changed_subject(self) -> FanProfileChangedSubject:
-        return FanProfileChangedSubject(Subject())
-
-    @singleton
-    @provider
-    def provide_overclock_profile_changed_subject(self) -> OverclockProfileChangedSubject:
-        return OverclockProfileChangedSubject(Subject())
-
-    @singleton
-    @provider
-    def provide_setting_changed_subject(self) -> SettingChangedSubject:
-        return SettingChangedSubject(Subject())
-
-
-INJECTOR = Injector(ProviderModule)

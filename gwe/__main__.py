@@ -25,6 +25,7 @@ from types import TracebackType
 from typing import Type
 from os.path import abspath, join, dirname
 
+from injector import Injector, inject
 from peewee import SqliteDatabase
 from gi.repository import GLib
 from reactivex.disposable import CompositeDisposable
@@ -37,7 +38,7 @@ from gwe.model.overclock_profile import OverclockProfile
 from gwe.model.setting import Setting
 from gwe.model.speed_step import SpeedStep
 from gwe.util.log import set_log_level
-from gwe.di import INJECTOR
+from gwe.di import ProviderModule
 from gwe.app import Application
 from gwe.repository.nvidia_repository import NvidiaRepository
 
@@ -55,53 +56,60 @@ locale.bindtextdomain(APP_PACKAGE_NAME, LOCALE_DIR)
 gettext.bindtextdomain(APP_PACKAGE_NAME, LOCALE_DIR)
 gettext.textdomain(APP_PACKAGE_NAME)
 
+class GweLifetime:
+    @inject
+    def __init__(self,
+                 composite_disposable: CompositeDisposable,
+                 nvidia_repository: NvidiaRepository,
+                 database: SqliteDatabase) -> None:
+        self._composite_disposable = composite_disposable
+        self._nvidia_repository = nvidia_repository
+        self._database = database
+        self._init_database()
 
-def _cleanup() -> None:
-    try:
-        _LOG.debug("cleanup")
-        composite_disposable = INJECTOR.get(CompositeDisposable)
-        composite_disposable.dispose()
-        nvidia_repository = INJECTOR.get(NvidiaRepository)
-        nvidia_repository.set_all_gpus_fan_to_auto()
-        database = INJECTOR.get(SqliteDatabase)
-        database.close()
-        # futures.thread._threads_queues.clear()
-    except:
-        _LOG.exception("Error during cleanup!")
+        sys.excepthook = self.handle_exception
 
-
-def handle_exception(type_: Type[BaseException], value: BaseException, traceback: TracebackType) -> None:
-    if issubclass(type_, KeyboardInterrupt):
-        sys.__excepthook__(type_, value, traceback)
-        return
-
-    _LOG.critical("Uncaught exception", exc_info=(type_, value, traceback))
-    _cleanup()
-    sys.exit(1)
-
-
-sys.excepthook = handle_exception
+    def cleanup(self) -> None:
+        try:
+            _LOG.debug("cleanup")
+            self._composite_disposable.dispose()
+            self._nvidia_repository.set_all_gpus_fan_to_auto()
+            self._database.close()
+            # futures.thread._threads_queues.clear()
+        except:
+            _LOG.exception("Error during cleanup!")
 
 
-def _init_database() -> None:
-    database = INJECTOR.get(SqliteDatabase)
-    database.create_tables([
-        SpeedStep,
-        FanProfile,
-        CurrentFanProfile,
-        OverclockProfile,
-        CurrentOverclockProfile,
-        Setting
-    ])
+    def handle_exception(self, type_: Type[BaseException], value: BaseException, traceback: TracebackType) -> None:
+        if issubclass(type_, KeyboardInterrupt):
+            sys.__excepthook__(type_, value, traceback)
+            return
+
+        _LOG.critical("Uncaught exception", exc_info=(type_, value, traceback))
+        self.cleanup()
+        sys.exit(1)
+
+    def _init_database(self) -> None:
+        self._database.create_tables([
+            SpeedStep,
+            FanProfile,
+            CurrentFanProfile,
+            OverclockProfile,
+            CurrentOverclockProfile,
+            Setting
+        ])
 
 
 def main() -> int:
     _LOG.debug("main")
-    _init_database()
-    application: Application = INJECTOR.get(Application)
+
+    injector = Injector([ProviderModule])
+
+    lifetime = injector.get(GweLifetime)
+    application: Application = injector.get(Application)
     GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGINT, application.quit)
     exit_status = application.run(sys.argv)
-    _cleanup()
+    lifetime.cleanup()
     return sys.exit(exit_status)
 
 

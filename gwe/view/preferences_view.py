@@ -15,17 +15,17 @@
 # You should have received a copy of the GNU General Public License
 # along with gwe.  If not, see <http://www.gnu.org/licenses/>.
 import logging
-from typing import Dict, Any
+from typing import Dict, Any, NewType
 
 from gi.repository import Gtk
 from injector import singleton, inject
 
-from gwe.di import PreferencesBuilder
 from gwe.presenter.preferences_presenter import PreferencesViewInterface, PreferencesPresenter
 from gwe.util.deployment import is_flatpak
 from gwe.util.view import hide_on_delete
 
 _LOG = logging.getLogger(__name__)
+PreferencesBuilder = NewType('PreferencesBuilder', Gtk.Builder)
 
 
 @singleton
