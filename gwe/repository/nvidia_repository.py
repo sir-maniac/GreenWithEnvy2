@@ -108,45 +108,57 @@ class NvidiaRepository:
     def get_max_values(self) -> Tuple[int,Clocks]:
         pynvml.nvmlInit()
         xlib_display = display.Display(self._ctrl_display)
-        gpu_count = xlib_display.nvcontrol_get_gpu_count()
+        try:
+            gpu_count = xlib_display.nvcontrol_get_gpu_count()
 
-        mem_total: int = DEFAULT_MAX_MEMORY
-        mem_clock_max: int = DEFAULT_MAX_MEM_CLOCK
-        graphic_max: int = DEFAULT_MAX_GPU_CLOCK
-        sm_max: int = 0
-        video_max: int= 0
+            mem_total: int = DEFAULT_MAX_MEMORY
+            mem_clock_max: int = DEFAULT_MAX_MEM_CLOCK
+            graphic_max: int = DEFAULT_MAX_GPU_CLOCK
+            sm_max: int = 0
+            video_max: int= 0
 
-        for gpu_index in range(gpu_count):
-            gpu = Gpu(gpu_index)
-            uuid: Optional[str] = xlib_display.nvcontrol_get_gpu_uuid(gpu)
-            assert uuid is not None
-            handle = pynvml.nvmlDeviceGetHandleByUUID(uuid.encode('utf-8'))
-            mem_info = self._nvml_get_val(pynvml.nvmlDeviceGetMemoryInfo,  handle)
-            if mem_info is not None:
-                mem_total = max(mem_total, mem_info.total // 1024 // 1024)
+            for gpu_index in range(gpu_count):
+                gpu = Gpu(gpu_index)
+                uuid: Optional[str] = xlib_display.nvcontrol_get_gpu_uuid(gpu)
+                assert uuid is not None
+                handle = pynvml.nvmlDeviceGetHandleByUUID(uuid.encode('utf-8'))
+                mem_info = self._nvml_get_val(pynvml.nvmlDeviceGetMemoryInfo,  handle)
+                if mem_info is not None:
+                    mem_total = max(mem_total, mem_info.total // 1024 // 1024)
 
-            perf_modes: List[Dict[str, Union[str, int]]] = xlib_display.nvcontrol_get_performance_modes(gpu)
-            perf_mode = next((p for p in perf_modes if p['perf'] == len(perf_modes) - 1), None)
-            g_max = perf_mode.get('nvclockmax') if perf_mode is not None else None
-            if g_max is not None:
-                assert isinstance(g_max, int)
-                graphic_max = max(graphic_max, g_max)
+                perf_modes: List[Dict[str, Union[str, int]]] = xlib_display.nvcontrol_get_performance_modes(gpu)
+                perf_mode = next((p for p in perf_modes if p['perf'] == len(perf_modes) - 1), None)
+                g_max = perf_mode.get('nvclockmax') if perf_mode is not None else None
+                if g_max is not None:
+                    assert isinstance(g_max, int)
+                    graphic_max = max(graphic_max, g_max)
 
-            sm = self._nvml_get_val(pynvml.nvmlDeviceGetMaxClockInfo, handle, NVML_CLOCK_SM)
-            if sm is not None:
-                sm_max = max(sm_max, sm)
-            mem_clk = self._nvml_get_val(pynvml.nvmlDeviceGetMaxClockInfo, handle, NVML_CLOCK_MEM)
-            if mem_clk is not None:
-                mem_clock_max = max(mem_clock_max, mem_clk)
-            v_max = self._nvml_get_val(pynvml.nvmlDeviceGetMaxClockInfo, handle, NVML_CLOCK_VIDEO)
-            if v_max is not None:
-                video_max = max(video_max, v_max)
+                sm = self._nvml_get_val(pynvml.nvmlDeviceGetMaxClockInfo, handle, NVML_CLOCK_SM)
+                if sm is not None:
+                    sm_max = max(sm_max, sm)
+                mem_clk = self._nvml_get_val(pynvml.nvmlDeviceGetMaxClockInfo, handle, NVML_CLOCK_MEM)
+                if mem_clk is not None:
+                    mem_clock_max = max(mem_clock_max, mem_clk)
+                v_max = self._nvml_get_val(pynvml.nvmlDeviceGetMaxClockInfo, handle, NVML_CLOCK_VIDEO)
+                if v_max is not None:
+                    video_max = max(video_max, v_max)
 
-        return (mem_total,
-                Clocks(graphic_max=graphic_max,
-                       sm_max=sm_max,
-                       memory_max=mem_clock_max,
-                       video_max=video_max))
+            return (mem_total,
+                    Clocks(graphic_max=graphic_max,
+                           sm_max=sm_max,
+                           memory_max=mem_clock_max,
+                           video_max=video_max))
+        except:
+            _LOG.exception("Error while getting max_values")
+            raise
+        finally:
+            try:
+                if xlib_display:
+                    xlib_display.close()
+                pynvml.nvmlShutdown()
+            except:
+                _LOG.exception("Error while getting max_values")
+                raise
 
     @synchronized_with_attr("_lock")
     def get_status(self) -> Optional[List[GpuStatus]]:
@@ -285,13 +297,24 @@ class NvidiaRepository:
 
     def set_overclock(self, gpu_index: int, perf: int, gpu_offset: int, memory_offset: int) -> bool:
         xlib_display = display.Display(self._ctrl_display)
-        gpu = Gpu(gpu_index)
-        gpu_result = (xlib_display.nvcontrol_set_gpu_nvclock_offset(gpu, perf, gpu_offset) or
-                      xlib_display.nvcontrol_set_gpu_nvclock_offset_all_levels(gpu, gpu_offset))
-        mem_result = (xlib_display.nvcontrol_set_mem_transfer_rate_offset(gpu, perf, memory_offset * 2) or
-                      xlib_display.nvcontrol_set_mem_transfer_rate_offset_all_levels(gpu, memory_offset * 2))
-        xlib_display.close()
-        return gpu_result is True and mem_result is True
+        try:
+            gpu = Gpu(gpu_index)
+            gpu_result = (xlib_display.nvcontrol_set_gpu_nvclock_offset(gpu, perf, gpu_offset) or
+                        xlib_display.nvcontrol_set_gpu_nvclock_offset_all_levels(gpu, gpu_offset))
+            mem_result = (xlib_display.nvcontrol_set_mem_transfer_rate_offset(gpu, perf, memory_offset * 2) or
+                        xlib_display.nvcontrol_set_mem_transfer_rate_offset_all_levels(gpu, memory_offset * 2))
+            xlib_display.close()
+            return gpu_result is True and mem_result is True
+        except:
+            _LOG.exception("Error while getting max_values")
+            return False
+        finally:
+            try:
+                if xlib_display:
+                    xlib_display.close()
+                pynvml.nvmlShutdown()
+            except:
+                _LOG.exception("Error while getting max_values")
 
     @staticmethod
     def set_power_limit(gpu_index: int, limit: int) -> bool:
@@ -311,19 +334,28 @@ class NvidiaRepository:
 
     def set_fan_speed(self, gpu_index: int, speed: int = 100, manual_control: bool = False) -> bool:
         xlib_display = display.Display(self._ctrl_display)
-        gpu = Gpu(gpu_index)
-        fan_indexes = xlib_display.nvcontrol_get_coolers_used_by_gpu(gpu)
-        error = False
-        if fan_indexes:
-            result = xlib_display.nvcontrol_set_cooler_manual_control_enabled(gpu, manual_control)
-            if not result:
-                error = True
-            for fan_index in fan_indexes:
-                result = xlib_display.nvcontrol_set_fan_duty(Cooler(fan_index), speed)
+        try:
+            gpu = Gpu(gpu_index)
+            fan_indexes = xlib_display.nvcontrol_get_coolers_used_by_gpu(gpu)
+            error = False
+            if fan_indexes:
+                result = xlib_display.nvcontrol_set_cooler_manual_control_enabled(gpu, manual_control)
                 if not result:
                     error = True
-        xlib_display.close()
-        return error
+                for fan_index in fan_indexes:
+                    result = xlib_display.nvcontrol_set_fan_duty(Cooler(fan_index), speed)
+                    if not result:
+                        error = True
+            return error
+        except:
+            _LOG.exception("Error while setting fan speed")
+            return False
+        finally:
+            try:
+                if xlib_display:
+                    xlib_display.close()
+            except:
+                _LOG.exception("Error while setting fan speed")
 
     @staticmethod
     def _nvml_get_val(a_function: Callable[..., T],
