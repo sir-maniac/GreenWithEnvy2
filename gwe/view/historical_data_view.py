@@ -54,6 +54,7 @@ class HistoricalDataView(HistoricalDataViewInterface):
         self._builder.connect_signals(self._presenter)
         self._nvidia_repository = nvidia_repository
         self._graphs: Dict[GraphType, Dict[str, Any]] = {}
+        self._initial_show = True
         self._init_widgets()
 
     def _init_widgets(self) -> None:
@@ -63,14 +64,22 @@ class HistoricalDataView(HistoricalDataViewInterface):
     def set_transient_for(self, window: Gtk.Window) -> None:
         self._dialog.set_transient_for(window)
 
+    def _init_max_values(self) -> None:
+        mem_total, max_clocks = self._nvidia_repository.get_max_values()
+
+        if max_clocks.graphic_max is not None:
+            self._graph_models[GraphType.GPU_CLOCK].value_max = max_clocks.graphic_max
+
+        if max_clocks.memory_max is not None:
+            self._graph_models[GraphType.MEMORY_CLOCK].value_max = max_clocks.memory_max
+
+        self._graph_models[GraphType.MEMORY_USAGE].value_max = mem_total
+
+
     # pylint: disable=attribute-defined-outside-init
     def _init_graphs(self) -> None:
         self._graph_views: Dict[GraphType, Tuple[Gtk.Label, Gtk.Label, Gtk.Label]] = {}
         self._graph_models: Dict[GraphType, GraphModel] = {}
-
-        mem_total: int
-        max_clocks: Clocks
-        mem_total, max_clocks = self._nvidia_repository.get_max_values()
 
         for graph_type in GraphType:
             self._graph_container: Gtk.Frame = self._builder.get_object(f'graph_container_{graph_type.value}')
@@ -82,25 +91,15 @@ class HistoricalDataView(HistoricalDataViewInterface):
             timespan: int = MONITORING_INTERVAL * 1000 * 1000
             init = GRAPH_INIT[graph_type]
 
-            max_value: float
-            if graph_type is GraphType.GPU_CLOCK:
-                max_value = max_clocks.graphic_max if max_clocks.graphic_max is not None else init.max_value
-            elif graph_type is GraphType.MEMORY_CLOCK:
-                max_value = max_clocks.memory_max if max_clocks.memory_max is not None else init.max_value
-            elif graph_type is GraphType.MEMORY_USAGE:
-                max_value = mem_total
-            else:
-                max_value = init.max_value
-
             graph_model = GraphModel(
                 column_names=["Col0"],
                 max_samples=max_samples,
                 timespan=timespan,
                 value_min=init.min_value,
-                value_max=max_value
+                value_max=init.max_value
             )
 
-            self._graph_views[graph_type][GV_MAX_VALUE].set_text(f"{max_value:.0f}")
+            self._graph_views[graph_type][GV_MAX_VALUE].set_text(f"{init.max_value:.0f}")
             self._graph_views[graph_type][GV_MIN_VALUE].set_text(f"{init.min_value:.0f}")
             self._graph_views[graph_type][GV_CUR_VALUE].set_text(f"0 {init.unit}")
 
@@ -142,6 +141,7 @@ class HistoricalDataView(HistoricalDataViewInterface):
 
     def reset_graphs(self) -> None:
         self._init_graphs()
+        self._init_max_values()
 
     def refresh_graphs(self, data_dict: Dict[GraphType, Tuple[int, float]]) -> None:
         time1 = time.time()
@@ -156,6 +156,9 @@ class HistoricalDataView(HistoricalDataViewInterface):
         _LOG.debug(f'Refresh graph took {((time2 - time1) * 1000.0):.3f} ms')
 
     def show(self) -> None:
+        if self._initial_show:
+            self._initial_show
+            self._init_max_values()
         self._dialog.show_all()
 
     def hide(self) -> None:
