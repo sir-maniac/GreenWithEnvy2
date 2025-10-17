@@ -1,3 +1,3 @@
 [D-BUS Service]
-Name=io.github.sir-maniac.gwe2
+Name=io.github.sir_maniac.gwe2
 Exec=@bindir@/gwe2 --gapplication-service

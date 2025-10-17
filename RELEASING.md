@@ -3,9 +3,9 @@
 WARNING: This from the original project and has't been updated for the fork yet.
 
 1. Bump the `APP_VERSION` property in `gwe/conf.py` based on Major.Minor.Patch naming scheme
-2. Update `data/io.github.sir-maniac.gwe2.appdata.xml` for the impending release.
+2. Update `data/io.github.sir_maniac.gwe2.appdata.xml` for the impending release.
 3. Run `./build.sh` to update the CHANGELOG.md
-4. `flatpak run --env=G_DEBUG=fatal-criticals org.freedesktop.appstream-glib validate data/io.github.sir-maniac.gwe2.appdata.xml`
+4. `flatpak run --env=G_DEBUG=fatal-criticals org.freedesktop.appstream-glib validate data/io.github.sir_maniac.gwe2.appdata.xml`
 5. Update the `README.md` with the new changes (if necessary).
 6. `git commit -am "Prepare for release X.Y.Z"` (where X.Y.Z is the version you set in step 1)
 7. `flatpak uninstall com.leinardi.gwe --assumeyes; ./build.sh --flatpak-local --flatpak-install --flatpak-bundle && flatpak run com.leinardi.gwe --debug`

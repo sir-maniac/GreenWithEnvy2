@@ -53,7 +53,7 @@ _LOG = logging.getLogger(__name__)
 PKGDATA_DIR: str  # set in gwe.__main__
 ICON_PATH: str # set in gwe.__main__
 
-_UI_RESOURCE_PATH = "/io/github/sir-maniac/gwe2/ui/{}"
+_UI_RESOURCE_PATH = "/io/github/sir_maniac/gwe2/ui/{}"
 
 # pylint: disable=no-self-use
 class ProviderModule(Module):

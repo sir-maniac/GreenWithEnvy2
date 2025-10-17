@@ -29,7 +29,7 @@ do
 done
 set -- "${POSITIONAL[@]}" # restore positional parameters
 
-APP_ID="io.github.sir-maniac.gwe2"
+APP_ID="io.github.sir_maniac.gwe2"
 BUILD_DIR="build"
 OUTPUT_DIR="${BUILD_DIR}/output"
 MESON_BUILD_DIR="${BUILD_DIR}/meson"

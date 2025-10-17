@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schemalist>
-    <schema path="/io/github/sir-maniac/gwe2/" id="io.github.sir-maniac.gwe2" gettext-domain="gwe2">
+    <schema path="/io/github/sir_maniac/gwe2/" id="io.github.sir_maniac.gwe2" gettext-domain="gwe2">
 
         <!-- <key type="s" name="username">
           <default>""</default>

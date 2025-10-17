@@ -12,7 +12,7 @@ I don't have a lot of time, so feel free to fork and release if you feel you hav
 > **Note:** As this is a new fork, the information below may not be up-to-date, as it is copied from the original project.
 
 ## 💡 Features
-<img src="/data/icons/hicolor/48x48@2x/apps/io.github.sir-maniac.gwe2.png" width="96" align="right" hspace="0" />
+<img src="/data/icons/hicolor/48x48@2x/apps/io.github.sir_maniac.gwe2.png" width="96" align="right" hspace="0" />
 
 * Show general GPU stats (model name, driver version, gpu/memory/power usage, clocks, temps, etc)
 * GPU and Memory overclock offset profiles

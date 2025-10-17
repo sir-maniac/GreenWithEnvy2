@@ -17,7 +17,7 @@
             card and graphics processor.
         </p>
     </description>
-    <launchable type="desktop-id">io.github.sir-maniac.gwe2.desktop</launchable>
+    <launchable type="desktop-id">io.github.sir_maniac.gwe2.desktop</launchable>
     <screenshots>
         <screenshot type="default">
             <image>https://raw.githubusercontent.com/sir-maniac/GreenWithEnvy2/refs/heads/master/art/screenshot-1.png</image>
