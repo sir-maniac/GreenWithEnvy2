@@ -17,7 +17,7 @@
 from enum import Enum
 import time
 import logging
-from typing import Dict, Tuple, Any, override
+from typing import Dict, Tuple, Any, cast
 
 from gi.repository import Gtk, GLib, Gdk, GObject
 from gi.repository.GObject import TYPE_DOUBLE
@@ -58,7 +58,8 @@ class HistoricalDataView(HistoricalDataViewInterface):
         self._init_widgets()
 
     def _init_widgets(self) -> None:
-        self._dialog: Gtk.Dialog = self._builder.get_object('dialog')
+        self._dialog = cast(Gtk.Dialog, self._builder.get_object('dialog'))
+        assert self._dialog is not None
         self._init_graphs()
 
     def set_transient_for(self, window: Gtk.Window) -> None:
@@ -82,10 +83,10 @@ class HistoricalDataView(HistoricalDataViewInterface):
         self._graph_models: Dict[GraphType, GraphModel] = {}
 
         for graph_type in GraphType:
-            self._graph_container: Gtk.Frame = self._builder.get_object(f'graph_container_{graph_type.value}')
-            self._graph_views[graph_type] = (self._builder.get_object(f'graph_min_value_{graph_type.value}'),
-                                                self._builder.get_object(f'graph_max_value_{graph_type.value}'),
-                                                self._builder.get_object(f'graph_max_axis_{graph_type.value}'))
+            self._graph_container = cast(Gtk.Frame, self._builder.get_object(f'graph_container_{graph_type.value}'))
+            self._graph_views[graph_type] = (cast(Gtk.Label, self._builder.get_object(f'graph_min_value_{graph_type.value}')),
+                                                cast(Gtk.Label, self._builder.get_object(f'graph_max_value_{graph_type.value}')),
+                                                cast(Gtk.Label, self._builder.get_object(f'graph_max_axis_{graph_type.value}')))
 
             max_samples: float = int( MONITORING_INTERVAL / self._presenter.get_refresh_interval() + 1 )
             timespan: int = MONITORING_INTERVAL * 1000 * 1000
