@@ -1,6 +1,6 @@
 injector==0.21.0
 packaging==24.1
-peewee==3.17.0
+peewee>=3.18.2
 nvidia-ml-py==12.535.133
 PyGObject==3.52.3
 python-xlib==0.33
