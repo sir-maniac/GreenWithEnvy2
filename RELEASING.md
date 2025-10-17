@@ -8,9 +8,9 @@ WARNING: This from the original project and has't been updated for the fork yet.
 4. `flatpak run --env=G_DEBUG=fatal-criticals org.freedesktop.appstream-glib validate data/io.github.sir_maniac.gwe2.appdata.xml`
 5. Update the `README.md` with the new changes (if necessary).
 6. `git commit -am "Prepare for release X.Y.Z"` (where X.Y.Z is the version you set in step 1)
-7. `flatpak uninstall com.leinardi.gwe --assumeyes; ./build.sh --flatpak-local --flatpak-install --flatpak-bundle && flatpak run com.leinardi.gwe --debug`
+7. `flatpak uninstall io.github.sir_maniac.gwe2 --assumeyes; ./build.sh --flatpak-local --flatpak-install --flatpak-bundle && flatpak run io.github.sir_maniac.gwe2 --debug`
 8. Tag version `X.Y.Z` (`git tag -s X.Y.Z`) (where X.Y.Z is the version you set in step 1)
-9. Update tag and SHA in `flatpak/com.leinardi.gwe.json`
+9. Update tag and SHA in `flatpak/io.github.sir_maniac.gwe2.json`
 10. `git push --follow-tags`
 11. Trigger Flathub build bot `cd flatpak && git commit -am "Release X.Y.Z" && git push` (where X.Y.Z is the version you set in step 1)
 12. Make a PR to the Flathub repository master, test the build and, if OK, merge the PR (https://github.com/flathub/com.leinardi.gwe)

@@ -41,13 +41,13 @@ flatpak --user remote-add --if-not-exists flathub https://flathub.org/repo/flath
 
 #### Install
 ```bash
-flatpak --user install flathub com.leinardi.gwe
+flatpak --user install flathub io.github.sir_maniac.gwe2
 flatpak update # needed to be sure to have the latest org.freedesktop.Platform.GL.nvidia
 ```
 
 #### Run
 ```bash
-flatpak run com.leinardi.gwe
+flatpak run io.github.sir_maniac.gwe2
 ```
 #### ⚠ Flatpak limitations
 ##### Beta Drivers
@@ -245,7 +245,7 @@ It is possible to build the local source or the remote one (the same that Flathu
 ```
 ### Run
 ```bash
-flatpak run com.leinardi.gwe --debug
+flatpak run io.github.sir_maniac.gwe2 --debug
 ```
 
 ## ❓ FAQ
@@ -316,7 +316,7 @@ The Memory Transfer Rate is simply double the Memory Clock.
 ### Where are the settings and profiles stored on the filesystem?
 | Installation type |                     Location                     |
 |-------------------|:------------------------------------------------:|
-| Flatpak           |        `$HOME/.var/app/com.leinardi.gwe/`        |
+| Flatpak           |        `$HOME/.var/app/io.github.sir_maniac.gwe2/`        |
 | Source code       | `$XDG_CONFIG_HOME` (usually `$HOME/.config/gwe`) |
 
 ### GreenWithEnvy, why using such name?
