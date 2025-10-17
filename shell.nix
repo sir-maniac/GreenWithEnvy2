@@ -19,7 +19,6 @@ pkgs.mkShell {
       pynvml
       pygobject3
       xlib
-      pyxdg
       requests
       rx
       gtk3

@@ -4,6 +4,5 @@ peewee==3.17.0
 nvidia-ml-py==12.535.133
 PyGObject==3.52.3
 python-xlib==0.33
-pyxdg==0.28
 requests==2.32.4
 reactivex==4.0.4

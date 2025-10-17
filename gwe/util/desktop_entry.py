@@ -17,10 +17,7 @@
 from pathlib import Path
 from typing import Optional
 
-from xdg.BaseDirectory import xdg_config_home, xdg_data_home
-
-from gi.repository import Gtk
-from gi.repository.Gtk import IconLookupFlags
+from gi.repository import GLib
 
 from gwe.conf import DESKTOP_ENTRY, APP_ICON_NAME, APP_DESKTOP_ENTRY_NAME, APP_PACKAGE_NAME
 from gwe.model.sys_paths import SysPaths
@@ -29,8 +26,8 @@ from gwe.util.desktop.desktop_parser import DesktopParser
 DESKTOP_ENTRY_EXEC = 'Exec'
 DESKTOP_ENTRY_ICON = 'Icon'
 AUTOSTART_FLAG = 'X-GNOME-Autostart-enabled'
-AUTOSTART_FILE_PATH = Path(xdg_config_home).joinpath('autostart').joinpath(APP_DESKTOP_ENTRY_NAME)
-APPLICATION_ENTRY_FILE_PATH = Path(xdg_data_home).joinpath('applications').joinpath(APP_DESKTOP_ENTRY_NAME)
+AUTOSTART_FILE_PATH = Path(GLib.get_user_config_dir()).joinpath('autostart').joinpath(APP_DESKTOP_ENTRY_NAME)
+APPLICATION_ENTRY_FILE_PATH = Path(GLib.get_user_data_dir()).joinpath('applications').joinpath(APP_DESKTOP_ENTRY_NAME)
 
 def set_autostart_entry(is_enabled: bool) -> None:
     desktop_parser = DesktopParser(str(AUTOSTART_FILE_PATH))

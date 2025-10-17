@@ -20,9 +20,8 @@ import os
 from pathlib import Path
 import shutil
 from typing import NewType
-from xdg import BaseDirectory
 
-from gi.repository import Gio, Gtk
+from gi.repository import Gio, GLib, Gtk
 from injector import Binder, Module, provider, singleton
 from peewee import BooleanField, SqliteDatabase
 from playhouse.migrate import SqliteMigrator, migrate
@@ -60,7 +59,7 @@ _UI_RESOURCE_PATH = "/com/leinardi/gwe/ui/{}"
 # pylint: disable=no-self-use
 class ProviderModule(Module):
     def configure(self, binder: Binder) -> None:
-        config_path = str(Path(BaseDirectory.save_config_path(APP_PACKAGE_NAME)))
+        config_path = str(Path(GLib.get_user_config_dir()) / APP_PACKAGE_NAME)
         sys_paths = SysPaths(PKGDATA_DIR, ICON_PATH, config_path)
 
         db = self._create_database(sys_paths.get_config_path(APP_DB_NAME))
