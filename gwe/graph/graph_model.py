@@ -24,7 +24,6 @@ from typing import Iterable, List, Optional
 
 from gi.repository import GLib, GObject
 from gi.repository.GObject import SignalFlags
-from pytest import param
 
 from .graph_column import GraphColumn
 

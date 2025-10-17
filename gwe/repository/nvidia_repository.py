@@ -24,7 +24,6 @@ from typing import List, Dict, Optional, Tuple, Callable, Any, TypeVar, Union, c
 from Xlib import display
 from Xlib.ext.nvcontrol import Gpu, Cooler
 from injector import singleton, inject
-from numpy import isin
 import pynvml
 
 from pynvml import c_nvmlMemory_t, NVML_CLOCK_GRAPHICS, NVML_CLOCK_MEM, NVML_CLOCK_SM, \
