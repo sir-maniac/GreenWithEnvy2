@@ -22,6 +22,7 @@ import time
 from typing import List, Dict, Optional, Tuple, Callable, Any, TypeVar, Union, cast
 
 from Xlib import display
+import Xlib
 from Xlib.ext.nvcontrol import Gpu, Cooler
 from injector import singleton, inject
 import pynvml
@@ -80,6 +81,9 @@ class NvidiaRepository:
             try:
                 if xlib_display:
                     xlib_display.close()
+            except Xlib.error.DisplayConnectionError:
+                # this error seems to happen even when intentionally closed
+                pass
             except:
                 _LOG.exception("Error while checking NV-CONTROL extension")
         return False
@@ -156,6 +160,9 @@ class NvidiaRepository:
                 if xlib_display:
                     xlib_display.close()
                 pynvml.nvmlShutdown()
+            except Xlib.error.ConnectionClosedError:
+                # this error seems to happen even when intentionally closed
+                pass
             except:
                 _LOG.exception("Error while getting max_values")
                 raise
@@ -291,6 +298,9 @@ class NvidiaRepository:
                 if xlib_display:
                     xlib_display.close()
                 pynvml.nvmlShutdown()
+            except Xlib.error.DisplayConnectionError:
+                # this error seems to happen even when intentionally closed
+                pass
             except:
                 _LOG.exception("Error while getting status")
         return None
@@ -303,7 +313,6 @@ class NvidiaRepository:
                         xlib_display.nvcontrol_set_gpu_nvclock_offset_all_levels(gpu, gpu_offset))
             mem_result = (xlib_display.nvcontrol_set_mem_transfer_rate_offset(gpu, perf, memory_offset * 2) or
                         xlib_display.nvcontrol_set_mem_transfer_rate_offset_all_levels(gpu, memory_offset * 2))
-            xlib_display.close()
             return gpu_result is True and mem_result is True
         except:
             _LOG.exception("Error while getting max_values")
@@ -313,6 +322,9 @@ class NvidiaRepository:
                 if xlib_display:
                     xlib_display.close()
                 pynvml.nvmlShutdown()
+            except Xlib.error.DisplayConnectionError:
+                # this error seems to happen even when intentionally closed
+                pass
             except:
                 _LOG.exception("Error while getting max_values")
 
@@ -354,6 +366,9 @@ class NvidiaRepository:
             try:
                 if xlib_display:
                     xlib_display.close()
+            except Xlib.error.DisplayConnectionError:
+                # this error seems to happen even when intentionally closed
+                pass
             except:
                 _LOG.exception("Error while setting fan speed")
 
