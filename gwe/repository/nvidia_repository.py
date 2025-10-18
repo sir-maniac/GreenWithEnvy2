@@ -321,7 +321,6 @@ class NvidiaRepository:
             try:
                 if xlib_display:
                     xlib_display.close()
-                pynvml.nvmlShutdown()
             except Xlib.error.DisplayConnectionError:
                 # this error seems to happen even when intentionally closed
                 pass
