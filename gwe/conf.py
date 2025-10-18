@@ -16,9 +16,9 @@
 # along with gwe.  If not, see <http://www.gnu.org/licenses/>.
 from typing import Dict, Any
 
-APP_PACKAGE_NAME = "gwe"
-APP_NAME = "GWE"
-APP_ID = "com.leinardi.gwe"
+APP_PACKAGE_NAME = "gwe2"
+APP_NAME = "GWE2"
+APP_ID = "io.github.sir-maniac.gwe2"
 APP_VERSION = "0.15.9"
 APP_ICON_NAME = APP_ID
 APP_ICON_NAME_SYMBOLIC = APP_ID + "-symbolic"

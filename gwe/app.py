@@ -146,7 +146,7 @@ class Application(Gtk.Application):
             build_glib_option(_Options.CTRL_DISPLAY.value,
                               arg=GLib.OptionArg.STRING,
                               description="Specify the NV-CONTROL display (if you use Bumblebee, set this to \":8\" "
-                                          "and start GWE with optirun)"),
+                                          "and start GWE2 with optirun)"),
         ]
         if not is_flatpak():
             options.append(build_glib_option(_Options.AUTOSTART_ON.value,

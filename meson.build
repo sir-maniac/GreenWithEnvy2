@@ -1,4 +1,4 @@
-project('gwe',
+project('gwe2',
   version: run_command(
     'grep',
     'APP_VERSION',

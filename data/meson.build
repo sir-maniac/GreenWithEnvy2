@@ -69,8 +69,8 @@ if false
   icon_targets = []
   foreach size: sizes
     icon_targets += custom_target('symbolic-icon-' + size,
-      input: 'icons/com.leinardi.gwe-symbolic.svg',
-      output: 'icons/com.leinardi.gwe-symbolic.png',
+      input: 'icons/' + app_id + '-symbolic.svg',
+      output: 'icons/' + app_id + '-symbolic.png',
       command: [gtk_encode_symbolic, '--output=' + meson.current_build_dir(), '@INPUT@', size]
     )
   endforeach
@@ -79,7 +79,7 @@ endif
 icondir = get_option('datadir') / 'icons'
 install_subdir('icons/hicolor', install_dir: icondir)
 
-install_data('icons/com.leinardi.gwe-symbolic.svg',
+install_data('icons/' + app_id + '-symbolic.svg',
   install_dir: icondir / 'hicolor/symbolic/apps'
 )
 
