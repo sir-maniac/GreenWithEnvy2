@@ -1,11 +1,11 @@
 [Desktop Entry]
-Name=GreenWithEnvy
+Name=GreenWithEnvy2
 Comment=Provides information, controls the fans and overclocks your NVIDIA video card
-Exec=@bindir@/gwe %U
-Icon=com.leinardi.gwe
+Exec=@bindir@/gwe2 %U
+Icon=io.github.sir_maniac.gwe2
 Terminal=false
 Type=Application
 StartupNotify=true
 MimeType=
 Categories=Utility;GTK;GNOME;
-Keywords=GWE;nvidia;overclock;
+Keywords=GWE;GWE2;nvidia;overclock;

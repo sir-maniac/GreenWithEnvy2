@@ -29,7 +29,7 @@ do
 done
 set -- "${POSITIONAL[@]}" # restore positional parameters
 
-APP_ID="com.leinardi.gwe"
+APP_ID="io.github.sir_maniac.gwe2"
 BUILD_DIR="build"
 OUTPUT_DIR="${BUILD_DIR}/output"
 MESON_BUILD_DIR="${BUILD_DIR}/meson"
@@ -45,8 +45,10 @@ function build_flatpak {
 	mkdir -p ${FLATPAK_REPO_DIR} && \
 	mkdir -p ${FLATPAK_BUILD_DIR} && \
 
-	time flatpak-builder --force-clean $2 --install-deps-from=flathub --repo=${FLATPAK_REPO_DIR} ${FLATPAK_BUILD_DIR} $1 && \
-	desktop-file-validate build/flatpak/build/files/share/applications/com.leinardi.gwe.desktop || exit $?
+	echo === Running flatpak-builder --system --force-clean $2 --install-deps-from=flathub --repo=${FLATPAK_REPO_DIR} ${FLATPAK_BUILD_DIR} $1
+
+	time flatpak-builder --system --force-clean $2 --install-deps-from=flathub --repo=${FLATPAK_REPO_DIR} ${FLATPAK_BUILD_DIR} $1 && \
+	desktop-file-validate build/flatpak/build/files/share/applications/${APP_ID}.desktop || exit $?
 }
 
 function build_flatpak_bundle {
@@ -59,8 +61,8 @@ if [[ ${#POSITIONAL[@]} -ne 0 ]]; then
 	exit 1
 fi
 
-appstream-util validate-relax data/com.leinardi.gwe.appdata.xml || exit $?
-appstream-util appdata-to-news data/com.leinardi.gwe.appdata.xml | sed '/^~*$/s/~/=/g' > CHANGELOG.md
+appstream-util validate-relax data/${APP_ID}.appdata.xml || exit $?
+appstream-util appdata-to-news data/${APP_ID}.appdata.xml | sed '/^~*$/s/~/=/g' > CHANGELOG.md
 [[ -d ${OUTPUT_DIR} ]] && rm -rfv ${OUTPUT_DIR}
 find . -regex '^.*\(__pycache__\|\.py[co]\)$' -delete
 
@@ -90,6 +92,6 @@ else
 	mkdir -pv ${MESON_BUILD_DIR} ${INSTALL_DIR} && \
 	meson setup . ${MESON_BUILD_DIR} --prefix=$PWD/${INSTALL_DIR} && \
 	ninja -v -C ${MESON_BUILD_DIR} && \
-	desktop-file-validate build/meson/data/com.leinardi.gwe.desktop && \
+	desktop-file-validate build/meson/data/${APP_ID}.desktop && \
 	ninja -v -C ${MESON_BUILD_DIR} install
 fi

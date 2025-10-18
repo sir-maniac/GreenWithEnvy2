@@ -1,20 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Copyright 2019 Roberto Leianrdi -->
+<!-- Copyright 2025 Ryan Bloomfield, 2019 Roberto Leianrdi -->
 <component type="desktop-application">
-    <id>com.leinardi.gwe.desktop</id>
+    <id>io.github.sir_maniac.gwe2.desktop</id>
 
     <!-- <translation type="gettext">trg</translation> -->
     <name>GreenWithEnvy</name>
-    <developer_name>Roberto Leinardi</developer_name>
-    <summary>System utility designed to provide information, control the fans and overclock your NVIDIA card</summary>
+    <developer id="io.github.sir-maniac">
+        <name>Ryan Bloomfield</name>
+        <name>Roberto Leinardi</name>
+   </developer>
+    <summary>System utility to view, control the fans, and overclock your NVIDIA card</summary>
     <metadata_license>CC0-1.0</metadata_license>
     <project_license>GPL-3.0-or-later</project_license>
     <description>
-        <p>GWE is a GTK system utility designed to provide information, control the fans and overclock your NVIDIA video
+        <p>GWE2 is a GTK system utility designed to provide information, control the fans and overclock your NVIDIA video
             card and graphics processor.
         </p>
     </description>
-    <launchable type="desktop-id">com.leinardi.gwe.desktop</launchable>
+    <launchable type="desktop-id">io.github.sir_maniac.gwe2.desktop</launchable>
     <screenshots>
         <screenshot type="default">
             <image>https://raw.githubusercontent.com/sir-maniac/GreenWithEnvy2/refs/heads/master/art/screenshot-1.png</image>
@@ -25,7 +28,6 @@
     </categories>
     <url type="homepage">https://github.com/sir-maniac/GreenWithEnvy2</url>
     <url type="bugtracker">https://github.com/sir-maniac/GreenWithEnvy2/issues</url>
-    <update_contact>roberto@leinardi.com</update_contact>
     <releases>
         <release date="2024-05-29" version="0.15.9">
             <description>

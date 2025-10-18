@@ -20,7 +20,7 @@
 import signal
 from pathlib import Path
 
-PKGDATA_DIR = Path(__file__).parent.parent / './build/output/install/share/gwe'
+PKGDATA_DIR = Path(__file__).parent.parent / './build/output/install/share/gwe2'
 localedir = Path(__file__).parent.parent / './build/output/install/share/locale'
 
 signal.signal(signal.SIGINT, signal.SIG_DFL)
