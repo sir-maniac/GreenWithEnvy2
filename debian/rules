@@ -1,0 +1,16 @@
+#!/usr/bin/make -f
+
+%:
+	dh $@ --with python3 --buildsystem=meson
+
+override_dh_auto_build:
+	dh_auto_build
+	# Add any additional build steps here
+
+override_dh_auto_install:
+	dh_auto_install
+	# Add any additional install steps here
+
+override_dh_install:
+	dh_install
+	# Add any additional install steps here
