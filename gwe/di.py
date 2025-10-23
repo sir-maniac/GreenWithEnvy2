@@ -32,7 +32,7 @@ from gwe.conf import (APP_DB_NAME, APP_DB_VERSION,
                       APP_EDIT_FAN_PROFILE_UI_NAME,
                       APP_EDIT_OC_PROFILE_UI_NAME, APP_HISTORICAL_DATA_UI_NAME, APP_ID,
                       APP_MAIN_UI_NAME, APP_PACKAGE_NAME,
-                      APP_PREFERENCES_UI_NAME)
+                      APP_PREFERENCES_UI_NAME, APP_RESOURCE_PATH)
 from gwe.model import fan_profile, overclock_profile, setting, speed_step
 from gwe.model.current_fan_profile import CurrentFanProfile
 from gwe.model.current_overclock_profile import CurrentOverclockProfile
@@ -53,7 +53,7 @@ _LOG = logging.getLogger(__name__)
 PKGDATA_DIR: str  # set in gwe.__main__
 ICON_PATH: str # set in gwe.__main__
 
-_UI_RESOURCE_PATH = "/io/github/sir_maniac/gwe2/ui/{}"
+_UI_RESOURCE_PATH = APP_RESOURCE_PATH + "/ui/{}"
 
 # pylint: disable=no-self-use
 class ProviderModule(Module):

@@ -35,6 +35,8 @@ APP_SOURCE_URL = 'https://github.com/sir-maniac/GreenWithEnvy2'
 APP_AUTHOR = 'Roberto Leinardi'
 APP_AUTHOR_EMAIL = 'roberto@leinardi.com'
 
+APP_RESOURCE_PATH = '/' + APP_ID.replace('.', '/')
+
 GRAPH_COLOR_HEX = '#76B900'
 
 MIN_TEMP = 0
