@@ -6,3 +6,4 @@
 pygobject-stubs --config-settings="config=Gtk3,Gdk3"
 pytest==8.4.2
 types-python-xlib==0.33.0.20250809
+types-peewee>=3.18.2
