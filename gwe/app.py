@@ -20,7 +20,7 @@ import gi
 from time import sleep
 from enum import Enum
 from gettext import gettext as _
-from typing import Any, Optional, List
+from typing import Any, Optional, List, cast
 from injector import inject, singleton
 from gwe.conf import APP_NAME, APP_ID, APP_VERSION, APP_ICON_NAME
 from gwe.view.main_view import MainBuilder
@@ -72,7 +72,7 @@ class Application(Gtk.Application):
     def do_activate(self) -> None:
         if not self._window:
             self._builder.connect_signals(self._presenter)
-            self._window: Gtk.ApplicationWindow = self._builder.get_object("application_window")
+            self._window = cast(Gtk.ApplicationWindow, self._builder.get_object("application_window"))
             self._window.set_icon_name(APP_ICON_NAME)
             self._window.set_application(self)
             self._view.show()
