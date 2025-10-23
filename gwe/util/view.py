@@ -34,7 +34,7 @@ def build_glib_option(long_name: str,
     option.short_name = 0 if not short_name else ord(short_name[0])
     option.flags = flags
     option.description = description
-    option.arg = arg
+    option.arg = int(arg)
     option.arg_description = arg_description
     option.arg_data = arg_data
     return option
