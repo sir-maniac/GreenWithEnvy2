@@ -32,8 +32,8 @@ localedir = '@localedir@'
 builddir = os.environ.get('MESON_BUILD_ROOT')
 if builddir:
     PKGDATA_DIR = os.path.join(builddir, 'data')
+    ICON_PATH = os.path.join(builddir, 'data/icons')
     sourcedir = os.environ.get('MESON_SOURCE_ROOT')
-    ICON_PATH = os.path.join(sourcedir, 'data/icons')
 
     os.environ['GSETTINGS_SCHEMA_DIR'] = PKGDATA_DIR
     sys.dont_write_bytecode = True

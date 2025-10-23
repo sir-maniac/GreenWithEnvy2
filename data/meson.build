@@ -93,27 +93,49 @@ if false
   endforeach
 endif
 
-icon_install_dir = get_option('datadir') / 'icons'
 
 sizes = ['16x16', '24x24', '32x32', '48x48', '256x256']
-foreach size: sizes
-  install_data(
-    'icons' / 'hicolor' / size / 'apps' / 'gwe.png',
-    rename: app_id + '.png',
-    install_dir: icon_install_dir / 'hicolor' / size / 'apps'
-  )
+cp = find_program('cp')
+mkdir = find_program('mkdir')
+copy_icon_cmd = []
 
-  size2 = size + '@2x'
-  install_data(
-    'icons' / 'hicolor' / size2 / 'apps' / 'gwe.png',
-    rename: app_id + '.png',
-    install_dir: icon_install_dir / 'hicolor' / size2 / 'apps'
-  )
+foreach size: sizes
+  foreach size_dir: [ size, size + '@2x' ]
+
+    source = files('icons/hicolor' / size_dir / 'apps/gwe.png')
+
+    dest_dir = 'icons/hicolor' / size_dir / 'apps'
+    dest_name =  app_id + '.png'
+
+    install_data(
+      source,
+      rename: dest_name,
+      install_dir: get_option('datadir') / dest_dir
+    )
+
+    # Documentation says assumption shouldn't be made about working directory
+    #  so use absolute destination path
+    copy_dest_dir = meson.current_build_dir() / dest_dir
+
+    if copy_icon_cmd.length() > 0
+      copy_icon_cmd += ['&&']
+    endif
+    copy_icon_cmd += [
+        mkdir, '-p', copy_dest_dir, '&&',
+        cp, source, copy_dest_dir / dest_name
+    ]
+
+  endforeach
 endforeach
+
+local_run_deps += custom_target('copy_icons',
+  output: 'phony_copy_icons',
+  command: copy_icon_cmd
+)
 
 install_data('icons/gwe-symbolic.svg',
   rename: app_id + '-symbolic.svg',
-  install_dir: icon_install_dir / 'hicolor/symbolic/apps'
+  install_dir: get_option('datadir') / 'icons/hicolor/symbolic/apps'
 )
 
 contributors = '\n'.join([
@@ -136,6 +158,7 @@ gwe_resources = gnome.compile_resources(app_id,
   install: true,
   install_dir: get_option('datadir') / meson.project_name()
 )
+local_run_deps += gwe_resources
 
 install_data(
   'gwe.appdata.xml',

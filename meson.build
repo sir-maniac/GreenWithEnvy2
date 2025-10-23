@@ -36,6 +36,9 @@ dependency('gobject-introspection-1.0', version: '>= 1.56.0')
 
 py_installation.install_sources(sources, preserve_path: true)
 
+# dependencies that are needed for 'run' and 'debug' targets
+local_run_deps = []
+
 subdir('data')
 subdir('bin')
 

@@ -16,9 +16,11 @@ configure_file(
 
 gwe = meson.project_build_root() / 'bin' / meson.project_name()
 run_target('run',
+  depends: local_run_deps,
   command: [gwe]
 )
 
 run_target('debug',
+  depends: local_run_deps,
   command: [gwe, '--debug']
 )
