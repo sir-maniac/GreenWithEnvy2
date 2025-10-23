@@ -93,11 +93,27 @@ if false
   endforeach
 endif
 
-icondir = get_option('datadir') / 'icons'
-install_subdir('icons/hicolor', install_dir: icondir)
+icon_install_dir = get_option('datadir') / 'icons'
 
-install_data('icons/' + app_id + '-symbolic.svg',
-  install_dir: icondir / 'hicolor/symbolic/apps'
+sizes = ['16x16', '24x24', '32x32', '48x48', '256x256']
+foreach size: sizes
+  install_data(
+    'icons' / 'hicolor' / size / 'apps' / 'gwe.png',
+    rename: app_id + '.png',
+    install_dir: icon_install_dir / 'hicolor' / size / 'apps'
+  )
+
+  size2 = size + '@2x'
+  install_data(
+    'icons' / 'hicolor' / size2 / 'apps' / 'gwe.png',
+    rename: app_id + '.png',
+    install_dir: icon_install_dir / 'hicolor' / size2 / 'apps'
+  )
+endforeach
+
+install_data('icons/gwe-symbolic.svg',
+  rename: app_id + '-symbolic.svg',
+  install_dir: icon_install_dir / 'hicolor/symbolic/apps'
 )
 
 contributors = '\n'.join([

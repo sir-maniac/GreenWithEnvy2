@@ -199,5 +199,5 @@ parser.add_argument('filter', type=str, nargs='?', metavar='FILTER',
 
 args = parser.parse_args()
 
-SRC = os.path.join('.', 'io.github.sir_maniac.gwe2.svg')
+SRC = os.path.join('.', 'gwe.svg')
 main(args, SRC)
