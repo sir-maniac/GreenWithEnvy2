@@ -126,3 +126,9 @@ install_data(
   rename: [app_id + '.appdata.xml'],
   install_dir: get_option('datadir') / 'metainfo'
 )
+
+gnome.post_install(
+  glib_compile_schemas: true,
+  gtk_update_icon_cache: true,
+  update_desktop_database: true
+)
