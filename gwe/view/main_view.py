@@ -58,7 +58,8 @@ from gwe.util.view import hide_on_delete, get_fan_profile_data
 from gwe.view.edit_overclock_profile_view import EditOverclockProfileView
 from gwe.view.historical_data_view import HistoricalDataView
 from gwe.view.preferences_view import PreferencesView
-from gwe.conf import APP_PACKAGE_NAME, APP_ID, APP_NAME, APP_VERSION, APP_SOURCE_URL, APP_ICON_NAME_SYMBOLIC
+from gwe.conf import (APP_PACKAGE_NAME, APP_ID, APP_NAME, APP_VERSION, APP_SOURCE_URL,
+                      APP_ICON_NAME, APP_ICON_NAME_SYMBOLIC)
 from gwe.presenter.main_presenter import MainPresenter, MainViewInterface
 
 if not HAS_MODULE_INDICATOR:
@@ -182,6 +183,7 @@ class MainView(MainViewInterface):
         self._about_dialog.set_program_name(APP_NAME)
         self._about_dialog.set_version(APP_VERSION)
         self._about_dialog.set_website(APP_SOURCE_URL)
+        self._about_dialog.set_logo_icon_name(APP_ICON_NAME)
         self._about_dialog.connect("delete-event", hide_on_delete)
         self._about_dialog.connect("response", hide_on_delete)
 
