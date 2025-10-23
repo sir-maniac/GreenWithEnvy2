@@ -1,8 +1,8 @@
 [Desktop Entry]
-Name=GreenWithEnvy2
+Name=@APP_NAME_LONG@
 Comment=Provides information, controls the fans and overclocks your NVIDIA video card
-Exec=@bindir@/gwe2 %U
-Icon=io.github.sir_maniac.gwe2
+Exec=@BIN_FILE@ %U
+Icon=@APP_ID@
 Terminal=false
 Type=Application
 StartupNotify=true

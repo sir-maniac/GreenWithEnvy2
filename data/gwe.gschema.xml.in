@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schemalist>
-    <schema path="/io/github/sir_maniac/gwe2/" id="io.github.sir_maniac.gwe2" gettext-domain="gwe2">
+    <schema path="@SCHEMA_PATH@" id="@APP_ID@" gettext-domain="@APP_NAME@">
 
         <!-- <key type="s" name="username">
           <default>""</default>

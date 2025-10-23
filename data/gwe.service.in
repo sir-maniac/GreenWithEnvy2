@@ -1,3 +1,4 @@
 [D-BUS Service]
-Name=io.github.sir_maniac.gwe2
-Exec=@bindir@/gwe2 --gapplication-service
+Name=@APP_ID@
+Exec=@BIN_FILE@ --gapplication-service
+

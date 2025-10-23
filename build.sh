@@ -63,8 +63,8 @@ if [[ ${#POSITIONAL[@]} -ne 0 ]]; then
 	exit 1
 fi
 
-appstream-util validate-relax data/${APP_ID}.appdata.xml || exit $?
-appstream-util appdata-to-news data/${APP_ID}.appdata.xml | sed '/^~*$/s/~/=/g' > CHANGELOG.md
+appstream-util validate-relax data/gwe.appdata.xml || exit $?
+appstream-util appdata-to-news data/gwe.appdata.xml | sed '/^~*$/s/~/=/g' > CHANGELOG.md
 [[ -d ${OUTPUT_DIR} ]] && rm -rfv ${OUTPUT_DIR}
 find . -regex '^.*\(__pycache__\|\.py[co]\)$' -delete
 

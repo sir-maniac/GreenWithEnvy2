@@ -7,29 +7,59 @@ app_id = run_command(
     check: true
   ).stdout().split(' = ')[1].strip().replace('"', '')
 
-desktop_conf = configuration_data()
-desktop_conf.set('bindir', get_option('prefix') / get_option('bindir'))
+resource_path = '/' + app_id.replace('.','/')
+
+conf_data = configuration_data()
+conf_data.set('BIN_FILE', get_option('prefix') / get_option('bindir') / meson.project_name())
+conf_data.set('APP_ID', app_id)
+conf_data.set('APP_NAME_LONG', 'GreenWithEnvy2')
+conf_data.set('APP_NAME', meson.project_name())
+conf_data.set('RESOURCE_PATH', resource_path)
+conf_data.set('SCHEMA_PATH', resource_path + '/')
+
 
 desktop_file = configure_file(
-  input: app_id + '.desktop.in',
+  input: 'gwe.desktop.in',
   output: app_id + '.desktop',
   #type: 'desktop',
+  configuration: conf_data,
   install: true,
   install_dir: get_option('datadir') / 'applications',
-  configuration: desktop_conf
 )
 
-message('Looking for dependencies')
-
+gresource_file = configure_file(
+  input: 'gwe.gresource.xml.in',
+  output: app_id + '.gresource.xml',
+  configuration: conf_data,
+)
 
 # TODO: Requires GLib 2.52 because of Meson issue
-#desktop_service = configure_file(
-#  input: app_id + '.service.desktop.in',
-#  output: app_id + '.service.desktop',
-#  configuration: desktop_conf,
+ service_desktop_file = configure_file(
+  input: 'gwe.service.desktop.in',
+  output: app_id + '.service.desktop',
+  configuration: conf_data,
 #  install: true,
-#  install_dir: get_option('datadir') / meson.project_name(),
-#)
+#  install_dir: get_option('datadir') / meson.project_name()
+)
+
+configure_file(
+  input: 'gwe.service.in',
+  output: app_id + '.service',
+  configuration: conf_data,
+  install: true,
+  install_dir: get_option('datadir') / 'dbus-1/services'
+)
+
+gschema_file = configure_file(
+  input: 'gwe.gschema.xml.in',
+  output: app_id + '.gschema.xml',
+  configuration: conf_data,
+  install: true,
+  install_dir: get_option('datadir') / 'glib-2.0/schemas'
+)
+
+
+message('Looking for dependencies')
 
 # i18n.merge_file(
 #   input: desktop_file,
@@ -48,20 +78,7 @@ message('Looking for dependencies')
 #   install_dir: get_option('datadir') / 'appdata'
 # )
 
-dbus_conf = configuration_data()
-dbus_conf.set('bindir', get_option('prefix') / get_option('bindir'))
 
-configure_file(
-  input: app_id + '.service.in',
-  output: app_id + '.service',
-  configuration: dbus_conf,
-  install: true,
-  install_dir: get_option('datadir') / 'dbus-1/services'
-)
-
-install_data(app_id + '.gschema.xml',
-  install_dir: get_option('datadir') / 'glib-2.0/schemas'
-)
 
 if false
   gtk_encode_symbolic = find_program('gtk-encode-symbolic-svg')
@@ -91,13 +108,21 @@ contributors = '\n'.join([
 
 
 gwe_resources = gnome.compile_resources(app_id,
-  app_id + '.gresource.xml',
+  gresource_file,
+  extra_args: ['--target',  'data/' + app_id + '.gresource'],
+  dependencies: [ gresource_file, service_desktop_file ],
+  source_dir: [
+    '.',
+    meson.current_build_dir() / 'data'
+  ],
+
   gresource_bundle: true,
   install: true,
   install_dir: get_option('datadir') / meson.project_name()
 )
 
 install_data(
-  app_id + '.appdata.xml',
+  'gwe.appdata.xml',
+  rename: [app_id + '.appdata.xml'],
   install_dir: get_option('datadir') / 'metainfo'
 )
