@@ -48,9 +48,8 @@ function build_flatpak {
 	mkdir -p ${FLATPAK_REPO_DIR} && \
 	mkdir -p ${FLATPAK_BUILD_DIR} && \
 
-	echo === Running flatpak-builder --system --force-clean $2 --install-deps-from=flathub --repo=${FLATPAK_REPO_DIR} ${FLATPAK_BUILD_DIR} $1
-
-	time flatpak-builder --system --force-clean $2 --install-deps-from=flathub --repo=${FLATPAK_REPO_DIR} ${FLATPAK_BUILD_DIR} $1 && \
+	echo === Running flatpak-builder --force-clean $2 --install-deps-from=flathub --repo=${FLATPAK_REPO_DIR} ${FLATPAK_BUILD_DIR} $1 && \
+	time flatpak-builder --force-clean $2 --install-deps-from=flathub --repo=${FLATPAK_REPO_DIR} ${FLATPAK_BUILD_DIR} $1 && \
 	desktop-file-validate ${FLATPAK_BUILD_DIR}/files/share/applications/${APP_ID}.desktop || exit $?
 }
 
