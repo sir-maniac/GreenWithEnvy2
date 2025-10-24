@@ -18,7 +18,7 @@
 # Code based on GNOME Usage from Petr Štětka
 #
 
-from typing import Optional, override
+from typing import Optional
 import cairo
 
 from gi.repository import GObject, Gdk
@@ -45,7 +45,6 @@ class GraphStackedRenderer(GraphRenderer):
     def set_line_width(self, width: float) -> None:
         self._line_width = width
 
-    @override
     def render(self,
                   table: GraphModel,
                   begin_time: int,

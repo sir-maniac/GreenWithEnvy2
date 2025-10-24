@@ -20,7 +20,7 @@
 #
 
 from abc import ABCMeta, abstractmethod
-from typing import Optional, override
+from typing import Optional
 import typing
 
 import cairo
@@ -63,7 +63,6 @@ class GraphLineRenderer(GraphRenderer):
         return self._stroke_color
     stroke_color_rgba = property(get_stroke_color_rgba, set_stroke_color_rgba)
 
-    @override
     def render(self,
                table : GraphModel,
                begin_time : int,
