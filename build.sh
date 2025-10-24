@@ -40,7 +40,7 @@ FLATPAK_BUILD_DIR="${BUILD_DIR}/flatpak/build"
 FLATPAK_REPO_DIR="${BUILD_DIR}/flatpak/repo"
 FLATPAK_INSTALL_PARAMETERS="--user --install"
 FLATPAK_REMOTE_MANIFEST="flatpak/${APP_ID}.json"
-FLATPAK_LOCAL_MANIFEST="build/flatpak/${APP_ID}.json"
+FLATPAK_LOCAL_MANIFEST="${BUILD_DIR}/flatpak/${APP_ID}.json"
 FLATPAK_OUTPUT_FILE="${OUTPUT_DIR}/${APP_ID}.flatpak"
 INSTALL_DIR="${OUTPUT_DIR}/install"
 
@@ -51,7 +51,7 @@ function build_flatpak {
 	echo === Running flatpak-builder --system --force-clean $2 --install-deps-from=flathub --repo=${FLATPAK_REPO_DIR} ${FLATPAK_BUILD_DIR} $1
 
 	time flatpak-builder --system --force-clean $2 --install-deps-from=flathub --repo=${FLATPAK_REPO_DIR} ${FLATPAK_BUILD_DIR} $1 && \
-	desktop-file-validate build/flatpak/build/files/share/applications/${APP_ID}.desktop || exit $?
+	desktop-file-validate ${FLATPAK_BUILD_DIR}/files/share/applications/${APP_ID}.desktop || exit $?
 }
 
 function build_flatpak_bundle {
@@ -95,6 +95,6 @@ else
 	mkdir -pv ${MESON_BUILD_DIR} ${INSTALL_DIR} && \
 	meson setup . ${MESON_BUILD_DIR} --prefix=$PWD/${INSTALL_DIR} && \
 	ninja -v -C ${MESON_BUILD_DIR} && \
-	desktop-file-validate build/meson/data/${APP_ID}.desktop && \
+	desktop-file-validate ${MESON_BUILD_DIR}/data/${APP_ID}.desktop && \
 	ninja -v -C ${MESON_BUILD_DIR} install
 fi
