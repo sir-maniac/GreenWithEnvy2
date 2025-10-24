@@ -100,6 +100,5 @@ else
 	mkdir -pv ${MESON_BUILD_DIR} ${INSTALL_DIR} && \
 	meson setup . ${MESON_BUILD_DIR} --prefix="$(realpath "${INSTALL_DIR}")" && \
 	ninja -v -C ${MESON_BUILD_DIR} && \
-	desktop-file-validate ${MESON_BUILD_DIR}/data/${APP_ID}.desktop && \
-	ninja -v -C ${MESON_BUILD_DIR} install
+	desktop-file-validate ${MESON_BUILD_DIR}/data/${APP_ID}.desktop
 fi
