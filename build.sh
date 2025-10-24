@@ -29,6 +29,9 @@ do
 done
 set -- "${POSITIONAL[@]}" # restore positional parameters
 
+# ensure we are at project root
+cd -P "$(dirname "${BASH_SOURCE[0]}")"
+
 APP_ID="io.github.sir_maniac.gwe2"
 BUILD_DIR="build"
 OUTPUT_DIR="${BUILD_DIR}/output"
