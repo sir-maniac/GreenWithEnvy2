@@ -43,6 +43,7 @@ FLATPAK_REMOTE_MANIFEST="flatpak/${APP_ID}.json"
 FLATPAK_LOCAL_MANIFEST="${BUILD_DIR}/flatpak/${APP_ID}.json"
 FLATPAK_OUTPUT_FILE="${OUTPUT_DIR}/${APP_ID}.flatpak"
 INSTALL_DIR="${OUTPUT_DIR}/install"
+VENV_DIR=".venv"
 
 function build_flatpak {
 	mkdir -p ${FLATPAK_REPO_DIR} && \
@@ -90,9 +91,14 @@ elif [[ ${FLATPAK_LOCAL} -eq 1 ]]; then
 elif [[ ${FLATPAK_BUNDLE} -eq 1 ]]; then
 	build_flatpak_bundle
 else
+	# use .venv if it exists
+	if [ -n "$VIRTUAL_ENV" -a -d "$VENV_DIR" ]; then
+		source "$VENV_DIR/bin/activate"
+	fi
+
 	[[ -d ${MESON_BUILD_DIR} ]] && rm -rfv ${MESON_BUILD_DIR}
 	mkdir -pv ${MESON_BUILD_DIR} ${INSTALL_DIR} && \
-	meson setup . ${MESON_BUILD_DIR} --prefix=$PWD/${INSTALL_DIR} && \
+	meson setup . ${MESON_BUILD_DIR} --prefix="$(realpath "${INSTALL_DIR}")" && \
 	ninja -v -C ${MESON_BUILD_DIR} && \
 	desktop-file-validate ${MESON_BUILD_DIR}/data/${APP_ID}.desktop && \
 	ninja -v -C ${MESON_BUILD_DIR} install
