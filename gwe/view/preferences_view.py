@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with gwe.  If not, see <http://www.gnu.org/licenses/>.
 import logging
-from typing import Dict, Any, NewType
+from typing import Dict, Any, NewType, cast
 
 from gi.repository import Gtk
 from injector import singleton, inject
@@ -43,11 +43,11 @@ class PreferencesView(PreferencesViewInterface):
         self._init_widgets()
 
     def _init_widgets(self) -> None:
-        self._dialog: Gtk.Dialog = self._builder.get_object('dialog')
+        self._dialog = cast(Gtk.Dialog, self._builder.get_object('dialog'))
         self._dialog.connect("delete-event", hide_on_delete)
         if is_flatpak():
-            self._builder.get_object('settings_launch_on_login_grid').set_sensitive(False)
-            self._builder.get_object('settings_launch_on_login_description_label')\
+            cast(Gtk.Grid, self._builder.get_object('settings_launch_on_login_grid')).set_sensitive(False)
+            cast(Gtk.Label, self._builder.get_object('settings_launch_on_login_description_label'))\
                 .set_text("Not supported by Flatpak (see https://github.com/flatpak/flatpak/issues/118)")
 
     def set_transient_for(self, window: Gtk.Window) -> None:
@@ -62,8 +62,8 @@ class PreferencesView(PreferencesViewInterface):
     def refresh_settings(self, settings: Dict[str, Any]) -> None:
         for key, value in settings.items():
             if isinstance(value, bool):
-                switch: Gtk.Switch = self._builder.get_object(key + '_switch')
+                switch: Gtk.Switch = cast(Gtk.Switch, self._builder.get_object(key + '_switch'))
                 switch.set_active(value)
             elif isinstance(value, int):
-                spinbutton: Gtk.SpinButton = self._builder.get_object(key + '_spinbutton')
+                spinbutton: Gtk.SpinButton = cast(Gtk.SpinButton, self._builder.get_object(key + '_spinbutton'))
                 spinbutton.set_value(value)
