@@ -19,29 +19,18 @@
 
 import os
 import sys
-import signal
 import gettext
 
 sys.path.insert(1, '@PYTHON_DIR@')
 
-VERSION = '@VERSION@'
 PKGDATA_DIR = '@PKGDATA_DIR@'
 ICON_PATH = '@ICON_PATH@'
-localedir = '@localedir@'
 
-builddir = os.environ.get('MESON_BUILD_ROOT')
-if builddir:
-    PKGDATA_DIR = os.path.join(builddir, 'data')
-    ICON_PATH = os.path.join(builddir, 'data/icons')
-    sourcedir = os.environ.get('MESON_SOURCE_ROOT')
-
-    os.environ['GSETTINGS_SCHEMA_DIR'] = PKGDATA_DIR
+# run from meson target without install
+source_dir = os.environ.get('MESON_SOURCE_ROOT')
+if source_dir is not None:
+    sys.path.insert(1, source_dir)
     sys.dont_write_bytecode = True
-    sys.path.insert(1, sourcedir)
-
-signal.signal(signal.SIGINT, signal.SIG_DFL)
-
-# gettext.install('trg', localedir)
 
 if __name__ == '__main__':
     from gwe import __main__

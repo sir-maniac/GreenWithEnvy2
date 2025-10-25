@@ -23,8 +23,9 @@ from injector import singleton, inject
 
 from gwe.conf import SETTINGS_DEFAULTS
 from gwe.interactor.settings_interactor import SettingsInteractor
+from gwe.model.sys_paths import SysPaths
 from gwe.util.deployment import is_flatpak
-from gwe.util.desktop_entry import set_autostart_entry, AUTOSTART_FILE_PATH
+from gwe.util.desktop_entry import DesktopEntry
 
 _LOG = logging.getLogger(__name__)
 
@@ -45,10 +46,14 @@ class PreferencesPresenter:
     @inject
     def __init__(self,
                  settings_interactor: SettingsInteractor,
+                 sys_paths: SysPaths,
+                 desktop_entry: DesktopEntry
                  ) -> None:
         _LOG.debug("init PreferencesPresenter ")
         self.view: PreferencesViewInterface = PreferencesViewInterface()
         self._settings_interactor = settings_interactor
+        self._desktop_entry = desktop_entry
+        self._is_app_installed: bool = sys_paths.is_installed
 
     def show(self) -> None:
         self._init_settings()
@@ -58,7 +63,7 @@ class PreferencesPresenter:
         settings: Dict[str, Any] = {}
         for key, default_value in SETTINGS_DEFAULTS.items():
             if isinstance(default_value, bool):
-                if key == 'settings_launch_on_login' and not AUTOSTART_FILE_PATH.is_file():
+                if key == 'settings_launch_on_login' and not self._desktop_entry.autostart_file_path.is_file():
                     self._settings_interactor.set_bool(key, False)
                 settings[key] = self._settings_interactor.get_bool(key)
             elif isinstance(default_value, int):
@@ -70,8 +75,8 @@ class PreferencesPresenter:
             value = args[0]
             key = re.sub('_switch$', '', widget.get_name())
             self._settings_interactor.set_bool(key, value)
-            if key == 'settings_launch_on_login' and not is_flatpak():
-                set_autostart_entry(value)
+            if key == 'settings_launch_on_login' and self._is_app_installed and not is_flatpak():
+                self._desktop_entry.set_autostart_entry(value)
         elif isinstance(widget, Gtk.SpinButton):
             key = re.sub('_spinbutton$', '', widget.get_name())
             value = widget.get_value_as_int()

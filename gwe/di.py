@@ -17,9 +17,10 @@
 
 import logging
 import os
-from pathlib import Path
 import shutil
-from typing import NewType
+import sys
+from pathlib import Path
+from typing import NewType, Optional
 
 from gi.repository import Gio, GLib, Gtk
 from injector import Binder, Module, provider, singleton
@@ -30,9 +31,10 @@ from reactivex.subject import Subject
 
 from gwe.conf import (APP_DB_NAME, APP_DB_VERSION,
                       APP_EDIT_FAN_PROFILE_UI_NAME,
-                      APP_EDIT_OC_PROFILE_UI_NAME, APP_HISTORICAL_DATA_UI_NAME, APP_ID,
-                      APP_MAIN_UI_NAME, APP_PACKAGE_NAME,
-                      APP_PREFERENCES_UI_NAME, APP_RESOURCE_PATH)
+                      APP_EDIT_OC_PROFILE_UI_NAME, APP_HISTORICAL_DATA_UI_NAME,
+                      APP_ID, APP_MAIN_UI_NAME, APP_PACKAGE_NAME,
+                      APP_PREFERENCES_UI_NAME, APP_RESOURCE_FILE_NAME,
+                      APP_RESOURCE_PATH, DEFAULT_ICON_PATH, TEST_ICON_PATH)
 from gwe.model import fan_profile, overclock_profile, setting, speed_step
 from gwe.model.current_fan_profile import CurrentFanProfile
 from gwe.model.current_overclock_profile import CurrentOverclockProfile
@@ -50,17 +52,17 @@ from gwe.view.preferences_view import PreferencesBuilder
 
 _LOG = logging.getLogger(__name__)
 
-PKGDATA_DIR: str  # set in gwe.__main__
-ICON_PATH: str # set in gwe.__main__
-
 _UI_RESOURCE_PATH = APP_RESOURCE_PATH + "/ui/{}"
 
 # pylint: disable=no-self-use
 class ProviderModule(Module):
-    def configure(self, binder: Binder) -> None:
-        config_path = str(Path(GLib.get_user_config_dir()) / APP_PACKAGE_NAME)
-        sys_paths = SysPaths(PKGDATA_DIR, ICON_PATH, config_path)
+    def __init__(self, bin_file: str, pkgdata_dir: str, icon_path: Optional[str]) -> None:
+        self.bin_file = bin_file
+        self.pkgdata_dir = pkgdata_dir
+        self.icon_path = icon_path
 
+    def configure(self, binder: Binder) -> None:
+        sys_paths = self._create_sys_paths()
         db = self._create_database(sys_paths.get_config_path(APP_DB_NAME))
         fan_subject = FanProfileChangedSubject(Subject())
         speed_step_subject = SpeedStepChangedSubject(Subject())
@@ -78,11 +80,13 @@ class ProviderModule(Module):
         # There might be a better place for this, but this seems a better place than the
         #  the top-level `gwe` file.
 
-        resource = Gio.Resource.load(os.path.join(sys_paths.pkgdata_dir, f'{APP_ID}.gresource'))
+        resource = Gio.Resource.load(os.path.join(sys_paths.pkgdata_dir, APP_RESOURCE_FILE_NAME))
         resource._register()
 
         icon_theme: Gtk.IconTheme = Gtk.IconTheme.get_default()
-        icon_theme.append_search_path(sys_paths.icon_path)
+        icon_search_path = icon_theme.get_search_path()
+        if not sys_paths.icon_path in icon_search_path:
+            icon_theme.append_search_path(sys_paths.icon_path)
 
         # peewee's model fundamentally clashes with injection, requiring
         #  configuration at the class level, rather than at instance
@@ -176,5 +180,42 @@ class ProviderModule(Module):
             database.pragma('user_version', APP_DB_VERSION, permanent=True)
 
         return database
+
+    def _create_sys_paths(self) -> SysPaths:
+        assert isinstance(self.bin_file, str)
+        assert isinstance(self.pkgdata_dir, str)
+
+        pkgdata_dir = self.pkgdata_dir
+        icon_path = self.icon_path
+        config_path = str(Path(GLib.get_user_config_dir()) / APP_PACKAGE_NAME)
+
+        is_installed = True
+
+        builddir = os.environ.get('MESON_BUILD_ROOT')
+        if builddir is not None:
+            # running in them meson build directory with 'run' or 'debug' target
+            is_installed = False
+            pkgdata_dir = os.path.join(builddir, 'data')
+            icon_path = os.path.join(builddir, 'data/icons')
+            os.environ['GSETTINGS_SCHEMA_DIR'] = pkgdata_dir
+
+        elif sys.prefix != sys.base_prefix:
+            # if installed in a virtual environment
+            env_path = Path(sys.prefix)
+            if (env_path / APP_PACKAGE_NAME / APP_RESOURCE_FILE_NAME).exists():
+                pkgdata_dir = str( env_path / APP_PACKAGE_NAME )
+                os.environ['GSETTINGS_SCHEMA_DIR'] = pkgdata_dir
+            if (env_path / f"icons/{TEST_ICON_PATH}").exists():
+                icon_path = str( env_path / 'icons')
+
+        if icon_path is None:
+            icon_path = DEFAULT_ICON_PATH
+
+        return SysPaths(is_installed=is_installed,
+                        bin_file=self.bin_file,
+                        pkgdata_dir=pkgdata_dir,
+                        icon_path=icon_path,
+                        config_path=config_path)
+
 
 

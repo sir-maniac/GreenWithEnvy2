@@ -34,8 +34,13 @@ APP_DESCRIPTION = 'GUI to control cooling and overclock of nVidia cards'
 APP_SOURCE_URL = 'https://github.com/sir-maniac/GreenWithEnvy2'
 APP_AUTHOR = 'Roberto Leinardi'
 APP_AUTHOR_EMAIL = 'roberto@leinardi.com'
+APP_RESOURCE_FILE_NAME = f"{APP_ID}.gresource"
 
 APP_RESOURCE_PATH = '/' + APP_ID.replace('.', '/')
+
+# used to find icon resource locations
+DEFAULT_ICON_PATH = '/usr/share/icons'
+TEST_ICON_PATH = f"hicolor/48x48/apps/{APP_ID}.png"
 
 GRAPH_COLOR_HEX = '#76B900'
 

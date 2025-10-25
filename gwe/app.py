@@ -30,7 +30,7 @@ from gwe.model.overclock_profile import OverclockProfile
 from gwe.presenter.main_presenter import MainPresenter
 from gwe.repository.nvidia_repository import NvidiaRepository
 from gwe.util.deployment import is_flatpak
-from gwe.util.desktop_entry import set_autostart_entry, add_application_entry
+from gwe.util.desktop_entry import DesktopEntry
 from gwe.util.log import LOG_DEBUG_FORMAT
 from gwe.util.view import build_glib_option
 from gwe.view.main_view import MainView
@@ -48,6 +48,7 @@ class Application(Gtk.Application):
                  view: MainView,
                  presenter: MainPresenter,
                  builder: MainBuilder,
+                 desktop_entry: DesktopEntry,
                  nvidia_repository: NvidiaRepository,
                  *args: Any,
                  **kwargs: Any) -> None:
@@ -64,6 +65,7 @@ class Application(Gtk.Application):
         self.add_main_option_entries(self._get_main_option_entries())
         self._view = view
         self._presenter = presenter
+        self._desktop_entry = desktop_entry
         self._nvidia_repository = nvidia_repository
         self._window: Optional[Gtk.ApplicationWindow] = None
         self._builder: Gtk.Builder = builder
@@ -111,12 +113,12 @@ class Application(Gtk.Application):
 
         if _Options.AUTOSTART_ON.value in options:
             _LOG.debug(f"Option {_Options.AUTOSTART_ON.value} selected")
-            set_autostart_entry(True)
+            self._desktop_entry.set_autostart_entry(True)
             start_app = False
 
         if _Options.AUTOSTART_OFF.value in options:
             _LOG.debug(f"Option {_Options.AUTOSTART_OFF.value} selected")
-            set_autostart_entry(False)
+            self._desktop_entry.set_autostart_entry(False)
             start_app = False
 
         if _Options.CTRL_DISPLAY.value in options:

@@ -18,6 +18,7 @@ from pathlib import Path
 from typing import Optional
 
 from gi.repository import GLib
+from injector import inject
 
 from gwe.conf import DESKTOP_ENTRY, APP_ICON_NAME, APP_DESKTOP_ENTRY_NAME, APP_PACKAGE_NAME
 from gwe.model.sys_paths import SysPaths
@@ -26,29 +27,35 @@ from gwe.util.desktop.desktop_parser import DesktopParser
 DESKTOP_ENTRY_EXEC = 'Exec'
 DESKTOP_ENTRY_ICON = 'Icon'
 AUTOSTART_FLAG = 'X-GNOME-Autostart-enabled'
-AUTOSTART_FILE_PATH = Path(GLib.get_user_config_dir()).joinpath('autostart').joinpath(APP_DESKTOP_ENTRY_NAME)
-APPLICATION_ENTRY_FILE_PATH = Path(GLib.get_user_data_dir()).joinpath('applications').joinpath(APP_DESKTOP_ENTRY_NAME)
 
-def set_autostart_entry(is_enabled: bool) -> None:
-    desktop_parser = DesktopParser(str(AUTOSTART_FILE_PATH))
+class DesktopEntry():
+    @inject
+    def __init__(self,
+                 sys_paths: SysPaths):
+        self._sys_paths = sys_paths
+        self.autostart_file_path = Path(GLib.get_user_config_dir()).joinpath('autostart').joinpath(APP_DESKTOP_ENTRY_NAME)
+        self.application_entry_file_path = Path(GLib.get_user_data_dir()).joinpath('applications').joinpath(APP_DESKTOP_ENTRY_NAME)
 
-    if not AUTOSTART_FILE_PATH.is_file():
-        for key, value in DESKTOP_ENTRY.items():
-            desktop_parser.set(key, value)
+    def set_autostart_entry(self, is_enabled: bool) -> None:
+        desktop_parser = DesktopParser(str(self.autostart_file_path))
+
+        if not self.autostart_file_path.is_file():
+            for key, value in DESKTOP_ENTRY.items():
+                desktop_parser.set(key, value)
+
+            desktop_parser.set(DESKTOP_ENTRY_ICON, APP_ICON_NAME)
+
+        desktop_parser.set(DESKTOP_ENTRY_EXEC, f'{self._sys_paths.bin_file} --hide-window --delay')
+        desktop_parser.set(AUTOSTART_FLAG, str(is_enabled).lower())
+        desktop_parser.write()
+
+
+    def add_application_entry(self) -> None:
+        desktop_parser = DesktopParser(str(self.application_entry_file_path))
+
+        for k, v in DESKTOP_ENTRY.items():
+            desktop_parser.set(k, v)
 
         desktop_parser.set(DESKTOP_ENTRY_ICON, APP_ICON_NAME)
-        desktop_parser.set(DESKTOP_ENTRY_EXEC, f'{APP_PACKAGE_NAME} --hide-window --delay')
-
-    desktop_parser.set(AUTOSTART_FLAG, str(is_enabled).lower())
-    desktop_parser.write()
-
-
-def add_application_entry() -> None:
-    desktop_parser = DesktopParser(str(APPLICATION_ENTRY_FILE_PATH))
-
-    for k, v in DESKTOP_ENTRY.items():
-        desktop_parser.set(k, v)
-
-    desktop_parser.set(DESKTOP_ENTRY_ICON, APP_ICON_NAME)
-    desktop_parser.set(DESKTOP_ENTRY_EXEC, APP_PACKAGE_NAME)
-    desktop_parser.write()
+        desktop_parser.set(DESKTOP_ENTRY_EXEC, self._sys_paths.bin_file)
+        desktop_parser.write()

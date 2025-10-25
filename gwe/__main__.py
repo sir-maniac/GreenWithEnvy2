@@ -16,13 +16,14 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with gwe.  If not, see <http://www.gnu.org/licenses/>.
+import os
 import signal
 import locale
 import gettext
 import logging
 import sys
 from types import TracebackType
-from typing import Type
+from typing import Optional, Type
 from os.path import abspath, join, dirname
 
 from injector import Injector, inject
@@ -50,6 +51,9 @@ from gwe.repository.nvidia_repository import NvidiaRepository
 
 WHERE_AM_I = abspath(dirname(__file__))
 LOCALE_DIR = join(WHERE_AM_I, 'mo')
+
+signal.signal(signal.SIGINT, signal.SIG_DFL)
+# gettext.install('trg', localedir)
 
 set_log_level(logging.INFO)
 
@@ -106,14 +110,17 @@ class GweLifetime:
             Setting
         ])
 
+def _get_bin_file() -> str:
+    argv0 = sys.argv[0]
+    if len(argv0) != 0 and argv0 != '-c':
+        return os.path.abspath(sys.argv[0])
+    else:
+        raise ValueError("Could not determine binary file path")
 
-def main(pkgdata_dir: str, icon_path: str) -> int:
+def main(pkgdata_dir: str, icon_path: Optional[str] = None) -> int:
     _LOG.debug("main")
 
-    di.PKGDATA_DIR = pkgdata_dir
-    di.ICON_PATH = icon_path
-
-    injector = Injector([ProviderModule])
+    injector = Injector(ProviderModule(_get_bin_file(), pkgdata_dir, icon_path))
 
     lifetime = injector.get(GweLifetime)
     application: Application = injector.get(Application)

@@ -20,6 +20,7 @@ from typing import Dict, Any, NewType, cast
 from gi.repository import Gtk
 from injector import singleton, inject
 
+from gwe.model.sys_paths import SysPaths
 from gwe.presenter.preferences_presenter import PreferencesViewInterface, PreferencesPresenter
 from gwe.util.deployment import is_flatpak
 from gwe.util.view import hide_on_delete
@@ -34,17 +35,23 @@ class PreferencesView(PreferencesViewInterface):
     def __init__(self,
                  presenter: PreferencesPresenter,
                  builder: PreferencesBuilder,
+                 sys_paths: SysPaths
                  ) -> None:
         _LOG.debug('init PreferencesView')
         self._presenter: PreferencesPresenter = presenter
         self._presenter.view = self
         self._builder: Gtk.Builder = builder
         self._builder.connect_signals(self._presenter)
+        self._is_installed = sys_paths.is_installed
         self._init_widgets()
 
     def _init_widgets(self) -> None:
         self._dialog = cast(Gtk.Dialog, self._builder.get_object('dialog'))
         self._dialog.connect("delete-event", hide_on_delete)
+        if not self._is_installed:
+            cast(Gtk.Grid, self._builder.get_object('settings_launch_on_login_grid')).set_sensitive(False)
+            cast(Gtk.Label, self._builder.get_object('settings_launch_on_login_description_label'))\
+                .set_text("Program not installed (dev build?)")
         if is_flatpak():
             cast(Gtk.Grid, self._builder.get_object('settings_launch_on_login_grid')).set_sensitive(False)
             cast(Gtk.Label, self._builder.get_object('settings_launch_on_login_description_label'))\
