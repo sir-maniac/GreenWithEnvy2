@@ -8,6 +8,7 @@ __pycache__/
 *.glade#
 *.iml
 *.iws
+
 .idea/*
 !.idea/codeStyleSettings.xml
 !.idea/checkstyle-idea.xml
@@ -18,9 +19,14 @@ __pycache__/
 !.idea/scopes/
 !.idea/vcs.xml
 *.autosave
+
 /.mypy_cache/
 .dmypy.json
 /venv/
-/.venv/
-.flatpak-builder/
-/.history
+
+.venv
+.history
+.flatpak
+.flatpak-builder
+.vscode
+
