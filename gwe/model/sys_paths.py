@@ -20,9 +20,21 @@ from pathlib import Path
 
 @dataclass
 class SysPaths:
+    is_installed: bool
+    """ If program is running in an installed location, rather than in the source tree  """
+    bin_file: str
+    """ Absolute path of the file to run this program """
     pkgdata_dir: str
+    """ Location of the program data (i.e. /usr/share/<app_name>)"""
     icon_path: str
+    """ Path to append to icon search path (i.e. /usr/share/icons ) """
     config_path: str
+    """
+        Path of user-level configuration such as:
+        - $XDG_CONFIG_HOME/<app_name>
+        - $HOME/.config/<app_name>
+        - for flatpak: $HOME/.var/app/<app_id>/<app_name>
+    """
 
     def get_config_path(self, file: str) -> str:
         return str( Path(self.config_path).joinpath(file) )
