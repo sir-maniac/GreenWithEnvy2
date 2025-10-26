@@ -25,7 +25,9 @@ Depends: ${python3:Depends},
          python3-gi (>= 3.48.2),
          python3-xlib (>= 0.33),
          python3-requests (>= 2.31),
-         python3-rx (>= 4.0.4)
+         python3-rx (>= 4.0.4),
+         gir1.2-ayatanaappindicator3-0.1 (>= 0.5.90)
+
 Description: System utility to view, control the fans, and overclock your NVIDIA card
  GWE2 is a GTK system utility designed to provide information, control the
  fans and overclock your NVIDIA video card and graphics processor.
