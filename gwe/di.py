@@ -191,8 +191,12 @@ class ProviderModule(Module):
 
         is_installed = True
 
+        editable: bool = 'GWE_RUN_LOCAL' in os.environ
         builddir = os.environ.get('MESON_BUILD_ROOT')
-        if builddir is not None:
+        if editable:
+            is_installed = False
+
+        elif builddir is not None:
             # running in them meson build directory with 'run' or 'debug' target
             is_installed = False
             pkgdata_dir = os.path.join(builddir, 'data')
@@ -216,6 +220,3 @@ class ProviderModule(Module):
                         pkgdata_dir=pkgdata_dir,
                         icon_path=icon_path,
                         config_path=config_path)
-
-
-

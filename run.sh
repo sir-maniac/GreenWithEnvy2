@@ -4,4 +4,4 @@
 cd -P "$(dirname "${BASH_SOURCE[0]}")"
 
 . build.sh && \
-ninja -v -C ${MESON_BUILD_DIR} debug
+bin/run-local.py

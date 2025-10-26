@@ -33,6 +33,7 @@ set -- "${POSITIONAL[@]}" # restore positional parameters
 cd -P "$(dirname "${BASH_SOURCE[0]}")"
 
 APP_ID="io.github.sir_maniac.gwe2"
+APP_PACKAGE_NAME="gwe2"
 BUILD_DIR="build"
 OUTPUT_DIR="${BUILD_DIR}/output"
 MESON_BUILD_DIR="${BUILD_DIR}/meson"
@@ -91,14 +92,26 @@ elif [[ ${FLATPAK_LOCAL} -eq 1 ]]; then
 elif [[ ${FLATPAK_BUNDLE} -eq 1 ]]; then
 	build_flatpak_bundle
 else
-	# use .venv if it exists
-	if [ -n "$VIRTUAL_ENV" -a -d "$VENV_DIR" ]; then
-		source "$VENV_DIR/bin/activate"
+	# activate or create the venv
+	if [ -z "$VIRTUAL_ENV" ]; then
+		if [ -d "$VENV_DIR" ]; then
+			source "$VENV_DIR/bin/activate" || exit $?
+		else
+			python3 -m venv .venv && \
+			source "$VENV_DIR/bin/activate" || exit $?
+		fi
 	fi
 
-	[[ -d ${MESON_BUILD_DIR} ]] && rm -rfv ${MESON_BUILD_DIR}
-	mkdir -pv ${MESON_BUILD_DIR} ${INSTALL_DIR} && \
-	meson setup . ${MESON_BUILD_DIR} --prefix="$(realpath "${INSTALL_DIR}")" && \
-	ninja -v -C ${MESON_BUILD_DIR} && \
+	if [ -z "$VIRTUAL_ENV" ]; then
+		echo Failed to activate $VENV_DIR
+		exit 1
+	fi
+
+	# dev.txt because pygobject needs an option passed
+	python3 -m pip --require-virtualenv install -U meson-python -r dev.txt && \
+	python3 -m pip --require-virtualenv install -Cbuild-dir="${MESON_BUILD_DIR}" \
+												--no-build-isolation \
+												--editable .'[test,dev]' || exit $?
+
 	desktop-file-validate ${MESON_BUILD_DIR}/data/${APP_ID}.desktop
 fi

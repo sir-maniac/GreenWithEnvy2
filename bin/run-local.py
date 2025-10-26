@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 
 # gwe
 #
@@ -17,15 +17,21 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import os
 import signal
 from pathlib import Path
+import sys
 
-PKGDATA_DIR = Path(__file__).parent.parent / 'build/data'
-ICON_PATH = Path(__file__).parent.parent / 'build/data/icons'
-localedir = Path(__file__).parent.parent / 'build/share/locale'
+source_root = Path(__file__).parent.parent
+
+PKGDATA_DIR = source_root / 'build/meson/data'
+ICON_PATH = source_root / 'build/meson/data/icons'
+#localedir = source_root / 'build/meson/share/locale'
+os.environ['GWE_RUN_LOCAL'] = "1"
+
+sys.path.insert(1, source_root)
 
 signal.signal(signal.SIGINT, signal.SIG_DFL)
-
 # gettext.install('trg', localedir)
 
 if __name__ == '__main__':

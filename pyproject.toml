@@ -1,0 +1,79 @@
+[build-system]
+requires = ["meson-python", "ninja"]
+build-backend = "mesonpy"
+
+[project]
+name = "gwe2"
+dynamic = ["version"]
+description = "System utility to view, control the fans, and overclock your NVIDIA card"
+readme = "README.md"
+authors = [
+    {name = "Ryan Bloomfield"},
+    {name = "Roberto Leinardi"}
+]
+license-files = [ "COPYING.txt" ]
+keywords = [ "GWE", "GWE2", "nvidia", "overclock" ]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: End Users/Desktop",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+    "Environment :: GPU",
+    "Environment :: X11 Applications :: GTK",
+    "Topic :: Utilities",
+    "Topic :: System :: Monitoring",
+    "Topic :: Desktop Environment :: Gnome",
+    "Topic :: Desktop Environment :: K Desktop Environment (KDE)",
+    "Operating System :: POSIX",
+    "Operating System :: Unix",
+]
+requires-python = ">=3.9"
+dependencies = [
+    "injector==0.21.0",
+    "packaging==24.1",
+    "peewee>=3.18.2",
+    "nvidia-ml-py==12.535.133",
+    "PyGObject==3.52.3",
+    "python-xlib==0.33",
+    "requests==2.32.4",
+    "reactivex==4.0.4",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest>=8.4.2",
+]
+dev = [
+    "types-python-xlib==0.33.0.20250809",
+    "types-peewee>=3.18.2",
+]
+
+[project.urls]
+Homepage = "https://github.com/sir-maniac/GreenWithEnvy2"
+Repository = "https://github.com/sir-maniac/GreenWithEnvy2.git"
+Bug-Tracker = "https://github.com/sir-maniac/GreenWithEnvy2"
+
+[tool.setuptools]
+packages = ["gwe"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "--verbose",
+    "--cov=gwe",
+    "--cov-report=html",
+    "--cov-report=term-missing",
+]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::PendingDeprecationWarning",
+]
+
