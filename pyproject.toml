@@ -33,15 +33,16 @@ classifiers = [
     "Operating System :: Unix",
 ]
 requires-python = ">=3.9"
+# remember to run scripts/generate_requirements.py after changes
 dependencies = [
-    "injector==0.21.0",
-    "packaging==24.1",
-    "peewee==3.17.0",
-    "nvidia-ml-py==12.535.133",
-    "PyGObject==3.52.3",
+    "injector>=0.20.1",
+    "packaging>=24.0",
+    "peewee>=3.17.0,<4.0",
+    "nvidia-ml-py>=12.535.133",
+    "PyGObject>=3.48.2",
     "python-xlib==0.33",
-    "requests==2.32.4",
-    "reactivex==4.0.4",
+    "requests>=2.31.0",
+    "reactivex>=4.0.4"
 ]
 
 [project.optional-dependencies]
