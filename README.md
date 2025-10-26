@@ -1,15 +1,11 @@
-# GreenWithEnvy (GWE)
+# GreenWithEnvy2 (GWE2)
 
 ## About
 
-GWE is/was a GTK system utility designed to provide information, control the fans and overclock your NVIDIA video card
+GWE2 is a GTK system utility designed to provide information, control the fans and overclock your NVIDIA video card
 and graphics processor.
 
-Forked from https://gitlab.com/leinardi/gwe. This fork is in it's initial stages of updating for a release. Issues and pull requests welcome.
-
-I don't have a lot of time, so feel free to fork and release if you feel you have more time to devote to this project.
-
-> **Note:** As this is a new fork, the information below may not be up-to-date, as it is copied from the original project.
+This is a fork of [gwe](https://gitlab.com/leinardi/gwe) by Roberto Leinardi. It is not affiliated with the original author.
 
 ## 💡 Features
 <img src="/data/icons/hicolor/48x48@2x/apps/gwe.png" width="96" align="right" hspace="0" />
@@ -24,153 +20,226 @@ I don't have a lot of time, so feel free to fork and release if you feel you hav
 
 ## 📦 How to get GWE
 If you don't like to reading manuals and/or you don't know what the Nvidia CoolBits are,
-you can watch the following How To made by [Intelligent Gaming](https://www.youtube.com/channel/UCH4d4o0Otxa7BNYs5Z5UEjg):
+you can watch the following How To made for the original project by [Intelligent Gaming](https://www.youtube.com/channel/UCH4d4o0Otxa7BNYs5Z5UEjg):
 
 [![How To Overclock And Control Fans On An nVidia Graphic Card In Linux - Green With Envy / GWE](https://img.youtube.com/vi/HAKe9ladLvc/0.jpg)](https://www.youtube.com/watch?v=HAKe9ladLvc)
 
-### Install from Flathub
-This is the preferred way to get GWE on any major distribution (Arch, Fedora, Linux Mint, openSUSE, Ubuntu, etc).
-
-If you don't have Flatpak installed you can find step by step instructions [here](https://flatpak.org/setup/).
-
-Make sure to have the Flathub remote added to the current user:
-
-```bash
-flatpak --user remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-```
-
-#### Install
-```bash
-flatpak --user install flathub io.github.sir_maniac.gwe2
-flatpak update # needed to be sure to have the latest org.freedesktop.Platform.GL.nvidia
-```
-
-#### Run
-```bash
-flatpak run io.github.sir_maniac.gwe2
-```
-#### ⚠ Flatpak limitations
-##### Beta Drivers
-Currently [Flatpak does not support Nvidia Beta drivers](https://github.com/flathub/org.freedesktop.Platform.GL.nvidia/issues/1)
-like 396.54.09 or 415.22.05.
-
-##### Bumblebee and Optimus
-Currently [Flatpak does not support Bumblebee](https://github.com/flatpak/flatpak/issues/869). If you want to use GWE with Bumblebee
-you need to install it from the source code.
-
-### Distro specific packages
-#### Arch Linux
-Install the `gwe` package from the AUR using your favourite helper, for example `yay -S gwe`.
-
-#### Fedora
-GWE avaliable in official Fedora [repos](https://src.fedoraproject.org/rpms/gwe) for F31+: `sudo dnf install gwe`
-
-For older Fedora releases you can use [COPR package](https://copr.fedorainfracloud.org/coprs/atim/gwe/): `sudo dnf copr enable atim/gwe -y && sudo dnf install gwe`
+> *Note:* Flathub packages are currently unavailable until this package is submitted to flathub.
 
 ### Install from source code
-#### Build time dependencies
+
+#### Build Time Dependencies
+
+<details>
+<summary> (click for details)</summary>
+
 | Distro                | pkg-config         | Python 3.9+   | gobject-introspection       | meson | ninja-build | appstream-util |
 | --------------------- | ------------------ | ------------- | --------------------------- | ----- | ----------- | -------------- |
 | Arch Linux            | pkg-config         | python        | gobject-introspection       | meson | ninja       | appstream-glib |
 | Fedora                | pkgconf-pkg-config | python3-devel | gobject-introspection-devel | meson | ninja-build | appstream-util |
 | OpenSUSE              | pkgconf-pkg-config | python3-devel | gobject-introspection-devel | meson | ninja-build | appstream-glib |
-| Ubuntu                | pkg-config         | python3-dev   | libgirepository1.0-dev      | meson | ninja-build | appstream-util |
+| Ubuntu / Debian       | pkg-config         | python3-dev   | libgirepository1.0-dev      | meson | ninja-build | appstream-util |
 
 Arch Linux:
 ```bash
-sudo pacman -S pkg-config python gobject-introspection meson ninja appstream-glib
+$ sudo pacman -S pkg-config python gobject-introspection meson ninja appstream-glib
 ```
 Fedora:
 ```bash
-sudo dnf install pkgconf-pkg-config python3-devel gobject-introspection-devel meson ninja-build appstream-util
+$ sudo dnf install pkgconf-pkg-config python3-devel gobject-introspection-devel meson ninja-build appstream-util
 ```
 OpenSUSE:
 ```bash
-sudo zypper install pkgconf-pkg-config python3-devel gobject-introspection-devel meson ninja-build appstream-glib
+$ sudo zypper install pkgconf-pkg-config python3-devel gobject-introspection-devel meson ninja-build appstream-glib
 ```
 Ubuntu/Debian:
 ```bash
-sudo apt install pkg-config python3-dev libgirepository1.0-dev meson ninja-build appstream-util
+$ sudo apt install pkg-config python3-dev libgirepository1.0-dev meson ninja-build appstream-util
 ```
+</details>
 
-#### Run time dependencies
-| Distro      | Python 3.9+ | pip         | gobject-introspection       | libappindicator          | gnome-shell-extension-appindicator |
-|-------------| ----------- | ----------- | --------------------------- | ------------------------ | ---------------------------------- |
-| Arch Linux  | python      | python-pip  | gobject-introspection       | libappindicator3         | gnome-shell-extension-appindicator |
-| Fedora      | python3     | python3-pip | gobject-introspection-devel | libappindicator-gtk3     | gnome-shell-extension-appindicator |
-| OpenSUSE    | python3     | python3-pip | gobject-introspection       | libappindicator3-1       | gnome-shell-extension-appindicator |
-| Ubuntu      | python3     | python3-pip | libgirepository1.0-dev      | gir1.2-appindicator3-0.1 | gnome-shell-extension-appindicator |
-| Debian      | python3     | python3-pip | libgirepository1.0-dev      | gir1.2-ayatanaappindicator3-0.1  | gnome-shell-extension-appindicator |
+#### Run Time Dependencies
+<details>
+<summary> (click for details)</summary>
+
+| Distro        | Python 3.9+ | pip         | gobject-introspection       | libappindicator          | gnome-shell-extension-appindicator |
+| ------------- | ----------- | ----------- | --------------------------- | ------------------------ | ---------------------------------- |
+| Arch Linux    | python      | python-pip  | gobject-introspection       | libappindicator3         | gnome-shell-extension-appindicator |
+| Fedora        | python3     | python3-pip | gobject-introspection-devel | libappindicator-gtk3     | gnome-shell-extension-appindicator |
+| OpenSUSE      | python3     | python3-pip | gobject-introspection       | libappindicator3-1       | gnome-shell-extension-appindicator |
+| Ubuntu / Debian | python3   | python3-pip | libgirepository1.0-dev      | gir1.2-ayatanaappindicator3-0.1 | gnome-shell-extension-appindicator |
 [comment]: <> (TODO: confirm if only debian and only KDE-Plasma. Might affect more systems and Desktop Environments)
 
 Arch Linux:
 ```bash
-sudo pacman -S python python-pip gobject-introspection libappindicator3 gnome-shell-extension-appindicator
+$ sudo pacman -S python python-pip gobject-introspection libappindicator3 gnome-shell-extension-appindicator
 ```
-
 Fedora:
 ```bash
-sudo dnf install python3 python3-pip gobject-introspection-devel libappindicator-gtk3 gnome-shell-extension-appindicator
+$ sudo dnf install python3 python3-pip gobject-introspection-devel libappindicator-gtk3 gnome-shell-extension-appindicator
 ```
 OpenSUSE:
 ```bash
-sudo zypper install python3 python3-pip gobject-introspection libappindicator3-1 gnome-shell-extension-appindicator
+$ sudo zypper install python3 python3-pip gobject-introspection libappindicator3-1 gnome-shell-extension-appindicator
 ```
-Ubuntu:
+Ubuntu / Debian:
 ```bash
-sudo apt install python3 python3-pip libgirepository1.0-dev gir1.2-appindicator3-0.1 gnome-shell-extension-appindicator
+$ sudo apt install python3 python3-pip libgirepository1.0-dev gir1.2-ayatanaappindicator3-0.1 gnome-shell-extension-appindicator
 ```
+</details>
 
-Debian:
+#### Python Dependencies
+
+> **Note:** Some dependencies aren't available in some distributions.  If you have some that are missing,
+ it is recommended you install in a virtual environment(like `pipx`) to avoid conflicts with the distribution's packages.
+
+<details>
+<summary>(click for details)</summary>
+
+Dependencies from [requirements.txt](requirements.txt):
+
+| Distro          | injector         | packaging         | peewee         | nvidia-ml-py   | PyGObject      | python-xlib  | requests         | reactivex         |
+| --------------- | ---------------- | ----------------- | -------------- | -------------- | -------------- | ------------ | ---------------- | ----------------- |
+| Arch            | --               | python-packaging  | python-peewee  | --             | python-gobject | python-xlib  | python-requests  | python-reactivex  |
+| Fedora          | python3-injector | python3-packaging | python3-peewee | --             | python3-gobject | python3-xlib | python3-requests | python3-reactivex |
+| OpenSUSE        | python-injector  | python-packaging  | python-peewee  | python-nvidia-ml-py3 | python-gobject | python-python-xlib | python-requests | python-reactivex |
+| Ubuntu / Debian | python3-injector | python3-packaging | python3-peewee | python3-pynvml | python3-gi     | python3-xlib | python3-requests | python3-rx        |
+
+> **Note:**  Some of these haven't been tested. I might have missed packages.  Please open a bug if you
+find mistakes.
+
+Arch Linux:
+
 ```bash
-sudo apt install python3 python3-pip libgirepository1.0-dev gir1.2-ayatanaappindicator3-0.1 gnome-shell-extension-appindicator
+$ sudo pacman -S python-packaging python-peewee python-gobject python-xlib python-requests python-reactivex
+```
+Fedora:
+```bash
+$ sudo dnf install python3-injector python3-packaging python3-peewee python3-gobject python3-xlib python3-requests python3-reactivex
+```
+OpenSUSE:
+```bash
+$ sudo zypper install python-injector python-packaging python-peewee python-nvidia-ml-py3 python-gobject python-python-xlib python-requests python-reactivex
+```
+Ubuntu/Debian:
+```bash
+$ sudo apt install python3-injector python3-packaging python3-peewee python3-pynvml python3-gi python3-xlib python3-requests python3-rx
 ```
 
-plus all the Python dependencies listed in [requirements.txt](requirements.txt)
+##### Using pip to install missing dependencies
 
-#### It is recommended to use the flatpak version for Debian.
+Some dependencies aren't available in some distributions.  If you have some that are missing,
+it is recommended you install in a virtual environment(like `pipx`) to avoid conflicts with
+the distribution's packages.
+
+If you still want to install globally and are willing to risk the issues, run the following **after installing all
+ the packages available for your distribution**.
+
+```bash
+# do a dry run and make sure you are okay with the changes pip will make
+$ sudo -H pip3 install --dry-run --break-system-packages -r requirements.txt
+
+# Re-run to make the changes.
+# WARNING: this might break your system's python packages
+$ sudo -H pip3 install --break-system-packages -r requirements.txt
+```
+</details>
 
 #### Clone project and install
+
 If you have not installed GWE yet:
+
 ```bash
-git clone --recurse-submodules -j4 https://github.com/sir-maniac/GreenWithEnvy2.git
-cd gwe
-git checkout master
-sudo -H pip3 install -r requirements.txt
-meson setup . build --prefix /usr/local
-meson compile -C build
-sudo meson install -C build
+git clone --branch release https://github.com/sir-maniac/GreenWithEnvy2.git
+cd GreenWithEnvy2
+```
+##### Install in an environment (recommended)
+
+After installing pipx, run:
+
+```bash
+$ pipx install .
+```
+
+##### Alterative: Install system-wide
+
+Install as many python packages as you can for your distribution, and install
+ any others using pip, as detailed under Python Dependencies.
+
+```bash
+$ meson setup . build --prefix /usr/local
+$ meson compile -C build
+$ sudo meson install -C build
 ```
 
 #### Update old installation
-If you installed GWE from source code previously and you want to update it:
-```bash
-cd gwe
-git fetch
-git checkout master
-git reset --hard origin/master
-git submodule init
-git submodule update
-sudo -H pip3 install -r requirements.txt
-meson setup . build --prefix /usr/local
-meson compile -C build
-sudo meson install -C build
-```
 
+If you installed GWE2 from source code previously and you want to update it:
+
+Check python requirements above and ensure they are installed/updated
+
+```bash
+$ cd GreenWithEnvy2
+$ git fetch
+$ git checkout release
+$ git reset --hard origin/release
+
+# Reinstall with pipx
+$ pipx uninstall gwe2 && pipx install .
+
+# Or for a system-wide install
+$ meson setup . build --reconfigure --prefix /usr/local
+$ meson compile -C build
+$ sudo meson install -C build
+```
 #### Run
+
 Once installed, to start it you can simply execute on a terminal:
 ```bash
-gwe
+$ gwe2
 ```
 
 #### ⚠ Bumblebee and Optimus
+
 If you want to use GWE with Bumblebee you need to start it with `optirun` and set the `--ctrl-display` parameter to `:8`:
 
 ```bash
-optirun gwe --ctrl-display ":8"
+$ optirun gwe2 --ctrl-display ":8"
 ```
 
-## ℹ️ TODO
+### Packages for the original GWE
+
+The following packages are still available for the original gwe.  They are here informational purposes.
+Support for them is limited, as bug fixes and changes won't appear in those packages.
+
+#### Arch Linux
+
+Install the `gwe` package from the AUR using your favourite helper, for example `yay -S gwe`.
+
+#### Fedora
+
+GWE avaliable in official Fedora [repos](https://src.fedoraproject.org/rpms/gwe) for F31+: `sudo dnf install gwe`
+
+For older Fedora releases you can use [COPR package](https://copr.fedorainfracloud.org/coprs/atim/gwe/): `sudo dnf copr enable atim/gwe -y && sudo dnf install gwe`
+
+### Flathub Limitations
+
+#### Beta Drivers
+
+Currently [Flatpak does not support Nvidia Beta drivers](https://github.com/flathub/org.freedesktop.Platform.GL.nvidia/issues/1)
+like 396.54.09 or 415.22.05.
+
+#### Bumblebee and Optimus
+
+Currently [Flatpak does not support Bumblebee](https://github.com/flatpak/flatpak/issues/869). If you want to use GWE with Bumblebee
+you need to install it from the source code.
+
+
+
+<details>
+<summary>
+ℹ️ TODO (click for details)
+</summary>
 
 - [x] Show general GPU info
 - [x] Show power info
@@ -200,6 +269,7 @@ optirun gwe --ctrl-display ":8"
 - [ ] Add support for multi-GPU
 - [ ] Allow to select profiles from app indicator
 - [ ] Add support for i18n (internationalization and localization)
+</details>
 
 <!--
 ## Application entry
@@ -226,9 +296,8 @@ If you don't have Flatpak installed you can find step by step instructions [here
 
 Make sure to have the Flathub remote added to the current user:
 
-```bash
-flatpak --user remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-```
+> *Note:* This fork hasn't been submitted to flathub yet, however you can still
+ build and install the flatpak package locally.
 
 ### Clone the repo
 ```bash
@@ -316,7 +385,7 @@ The Memory Transfer Rate is simply double the Memory Clock.
 ### Where are the settings and profiles stored on the filesystem?
 | Installation type |                     Location                     |
 |-------------------|:------------------------------------------------:|
-| Flatpak           |        `$HOME/.var/app/io.github.sir_maniac.gwe2/`        |
+| Flatpak           | `$HOME/.var/app/io.github.sir_maniac.gwe2/`      |
 | Source code       | `$XDG_CONFIG_HOME` (usually `$HOME/.config/gwe`) |
 
 ### GreenWithEnvy, why using such name?
@@ -325,42 +394,20 @@ Nvidia is meant to be pronounced "invidia", which means envy in Latin (and Itali
 
 ## 💚 How to help the project
 ### Help is needed for the following topics
- - Snap (see [#18](https://gitlab.com/leinardi/gwe/issues/18))
- - Getting current GTK theme text color (see [#36](https://gitlab.com/leinardi/gwe/issues/36))
- - Making Bumblebee work with Flatpak (see [#35](https://gitlab.com/leinardi/gwe/issues/35))
-
-### Discord server
-If you want to help testing or developing it would be easier to get in touch using the discord server of the project: https://discord.gg/xBybdRt
-Just write a message on the general channel saying how you want to help (test, dev, etc) and quoting @leinardi. If you don't use discor but still want to help just open a new issue here.
-
+ - Support for Wayland (see [#9](https://github.com/sir-maniac/GreenWithEnvy2/issues/9))
+ - Snap (see [#10](https://github.com/sir-maniac/GreenWithEnvy2/issues/10))
 
 ### Can I support this project some other way?
 
-Something simple that everyone can do is to star it on both [GitLab](https://gitlab.com/leinardi/gwe) and [GitHub](https://github.com/leinardi/gwe).
+Something simple that everyone can do is to star it on [GitHub](https://github.com/sir-maniac/GreenWithEnvy2).
 Feedback is always welcome: if you found a bug or would like to suggest a feature,
-feel free to open an issue on the [issue tracker](https://gitlab.com/leinardi/gwe/issues).
-
-## ⚠ Dropped PyPI support
-Development builds were previously distributed using PyPI. This way of distributing the software is simple
-but requires the user to manually install all the non Python dependencies like cairo, glib, appindicator3, etc.
-
-A solution for this problems is distributing the app via Flatpak, since with it all the dependencies
-will be bundled and provided automatically, making possible to use Gnome 3.30 features also on distributions
-using an older version of Gnome.
-
-**No new build will be published on PyPI**.
-
-### Uninstall pip version
-If you have already installed GWE via `pip`, please make sure to uninstall it completely before moving to a newer version:
-
-```bash
-pip3 uninstall gwe
-rm -rf ~/.config/gwe
-```
+feel free to open an issue on the [issue tracker](https://github.com/sir-maniac/GreenWithEnvy2/issues).
 
 ## ℹ️ Acknowledgements
-Thanks to:
+Special thanks to:
+ -  **Roberto Leinardi** for authoring GWE and assisting other contributors working to keep it alive.
 
+Thanks (from the original gwe):
  - GabMus and TingPing for the huge help with Flatpak
  - @999eagle for maintaining the [AUR package](https://aur.archlinux.org/packages/gwe/)
  - @tim74 for maintaining the [COPR package](https://copr.fedorainfracloud.org/coprs/atim/gwe/)
@@ -370,7 +417,7 @@ Thanks to:
  - tiheum for the [Faenza](https://www.deviantart.com/tiheum/art/Faenza-Icons-173323228) icons set, from which I took the current GWE launcher icon
  - all the people that helped testing and reported bugs
 
-## 📰 Media coverage
+## 📰 Media coverage for the original GWE
  - [OMG! Ubuntu](https://www.omgubuntu.co.uk/2019/02/easily-overclock-nvidia-gpu-on-linux-with-this-new-app) 🇬🇧
  - [GamingOnLinux](https://www.gamingonlinux.com/articles/greenwithenvy-an-impressive-tool-for-overclocking-nvidia-gpus.13521) 🇬🇧
  - [Phoronix](https://www.phoronix.com/scan.php?page=news_item&px=GreenWithEnvy-0.11-Released) 🇬🇧
@@ -386,6 +433,7 @@ Thanks to:
 ```
 This file is part of gwe.
 
+Copyright (c) 2025 Ryan Bloomfield
 Copyright (c) 2019 Roberto Leinardi
 
 gwe is free software: you can redistribute it and/or modify

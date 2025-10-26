@@ -17,4 +17,4 @@ If you want to fix a bug or implement a new feature, feel free to submit a new p
 To submit a pull request, you have to fork this repository and fill the PR template.
 When you want to submit a pull request, remember to:
 - follow this project's code style
-- check for PyLint and Mypy errors
+- check for Pyright/Pylance and Mypy errors
