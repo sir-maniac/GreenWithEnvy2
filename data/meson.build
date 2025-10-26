@@ -129,6 +129,7 @@ foreach size: sizes
 endforeach
 
 local_run_deps += custom_target('copy_icons',
+  build_by_default: true,
   output: 'phony_copy_icons',
   command: copy_icon_cmd
 )
