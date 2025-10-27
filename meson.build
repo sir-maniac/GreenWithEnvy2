@@ -14,16 +14,16 @@ conf_py = files('gwe/conf.py')
 # Importing modules
 # i18n = import('i18n')
 python = import('python')
-py_installation = python.find_installation('python3')
-if not py_installation.found()
+py = python.find_installation('python3')
+if not py.found()
     error('No valid python3 installation found')
 else
     message('Found python3 installation')
 endif
 
 summary({
-  'Python Binary': py_installation.full_path(),
-  'Python Install Path': py_installation.get_install_dir()
+  'Python Binary': py.full_path(),
+  'Python Install Path': py.get_install_dir()
 })
 
 find_result = run_command(
