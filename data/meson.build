@@ -89,23 +89,6 @@ contributors = '\n'.join([
   'Gabriele Musco (gabmus) &lt;emaildigabry@gmail.com&gt;'
 ])
 
-LIBEXEC_DIR = get_option('prefix') / get_option('libexecdir')
-EXTENSION_DIR = get_option('prefix') / get_option('libdir') / meson.project_name()
-bindir = get_option('prefix') / get_option('bindir')
-
-glade_conf = configuration_data()
-glade_conf.set('PACKAGE_URL', 'https://github.com/sir-maniac/GreenWithEnvy2/issues')
-glade_conf.set('DATA_DIR', get_option('prefix') / get_option('datadir') / meson.project_name())
-glade_conf.set('EXTENSION_DIR', EXTENSION_DIR)
-glade_conf.set('LOCALE_DIR', get_option('prefix') / get_option('datadir') / 'locale')
-glade_conf.set('PYTHON_DIR', py_installation.get_install_dir())
-#glade_conf.set('PYTHON_EXEC_DIR', get_option('prefix') / python.sysconfig_path('stdlib'))
-glade_conf.set('PYTHON', py_installation.full_path())
-glade_conf.set('APPID', app_id)
-glade_conf.set('libexecdir', LIBEXEC_DIR)
-# this is for development version # glade_conf.set('VERSION', ''.join([run_command(['git', 'describe', '--long', '--tags']).stdout(), get_option('profile')]))
-glade_conf.set('VERSION', meson.project_version())
-glade_conf.set('CONTRIBUTORS', contributors)
 
 gwe_resources = gnome.compile_resources(app_id,
   app_id + '.gresource.xml',
