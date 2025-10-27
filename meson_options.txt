@@ -1,0 +1,4 @@
+option('setuptools', type: 'boolean', value: false,
+  description: 'Package resources directly in package per recommendations by ' +
+  'setuptools(and pip, and meson-python)'
+)

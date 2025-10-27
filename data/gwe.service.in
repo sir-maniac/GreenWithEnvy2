@@ -1,4 +1,4 @@
 [D-BUS Service]
 Name=@APP_ID@
-Exec=@BIN_FILE@ --gapplication-service
+Exec=@EXEC@ --gapplication-service
 

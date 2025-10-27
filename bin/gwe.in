@@ -34,4 +34,10 @@ if source_dir is not None:
 
 if __name__ == '__main__':
     from gwe import __main__
-    __main__.main(PKGDATA_DIR, ICON_PATH)
+
+    # safe to pass the dirname of PKGDATA_DIR because meson configuration
+    #  doesn't change the relationship of the paths
+
+    __main__.main(pkgdata_dir=PKGDATA_DIR,
+                  data_dir=os.path.dirname(PKGDATA_DIR),
+                  icon_path=ICON_PATH)

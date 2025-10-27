@@ -1,10 +1,15 @@
+if setuptools
+  subdir_done()
+endif
+
+
 conf = configuration_data()
 conf.set('VERSION', meson.project_version())
 conf.set('localedir', get_option('prefix') / get_option('localedir'))
 conf.set('PKGDATA_DIR', get_option('prefix') / get_option('datadir') / meson.project_name())
 conf.set('ICON_PATH', get_option('prefix') / get_option('datadir') / 'icons' )
-conf.set('PYTHON', py_installation.full_path())
-conf.set('PYTHON_DIR', py_installation.get_install_dir())
+conf.set('PYTHON', py.full_path())
+conf.set('PYTHON_DIR', py.get_install_dir())
 
 configure_file(
   input: 'gwe.in',

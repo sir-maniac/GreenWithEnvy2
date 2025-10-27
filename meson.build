@@ -9,6 +9,7 @@ project('gwe2',
 )
 # project version is defined in gwe/conf.py
 
+setuptools = get_option('setuptools')
 conf_py = files('gwe/conf.py')
 
 # Importing modules
@@ -19,6 +20,13 @@ if not py.found()
     error('No valid python3 installation found')
 else
     message('Found python3 installation')
+endif
+
+if setuptools
+  # install resources within the python package
+  resource_data_dir = py.get_install_dir() / 'gwe/data'
+else
+  resource_data_dir = get_option('datadir')
 endif
 
 summary({
@@ -34,7 +42,7 @@ sources = find_result.stdout().strip().split('\n')
 # Dependencies
 dependency('gobject-introspection-1.0', version: '>= 1.56.0')
 
-py_installation.install_sources(sources, preserve_path: true)
+py.install_sources(sources, preserve_path: true)
 
 # dependencies that are needed for 'run' and 'debug' targets
 local_run_deps = []

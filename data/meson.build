@@ -10,13 +10,18 @@ app_id = run_command(
 resource_path = '/' + app_id.replace('.','/')
 
 conf_data = configuration_data()
-conf_data.set('BIN_FILE', get_option('prefix') / get_option('bindir') / meson.project_name())
 conf_data.set('APP_ID', app_id)
 conf_data.set('APP_NAME_LONG', 'GreenWithEnvy2')
 conf_data.set('APP_NAME', meson.project_name())
 conf_data.set('RESOURCE_PATH', resource_path)
 conf_data.set('SCHEMA_PATH', resource_path + '/')
 
+# Exec entry in .desktop file
+if setuptools
+  conf_data.set('EXEC', meson.project_name())
+else
+  conf_data.set('EXEC', get_option('prefix') / get_option('bindir') / meson.project_name())
+endif
 
 desktop_file = configure_file(
   input: 'gwe.desktop.in',
@@ -24,7 +29,7 @@ desktop_file = configure_file(
   #type: 'desktop',
   configuration: conf_data,
   install: true,
-  install_dir: get_option('datadir') / 'applications',
+  install_dir: resource_data_dir / 'applications',
 )
 
 gresource_file = configure_file(
@@ -39,7 +44,7 @@ gresource_file = configure_file(
   output: app_id + '.service.desktop',
   configuration: conf_data,
 #  install: true,
-#  install_dir: get_option('datadir') / meson.project_name()
+#  install_dir: resource_data_dir / meson.project_name()
 )
 
 configure_file(
@@ -47,7 +52,7 @@ configure_file(
   output: app_id + '.service',
   configuration: conf_data,
   install: true,
-  install_dir: get_option('datadir') / 'dbus-1/services'
+  install_dir: resource_data_dir / 'dbus-1/services'
 )
 
 gschema_file = configure_file(
@@ -55,7 +60,7 @@ gschema_file = configure_file(
   output: app_id + '.gschema.xml',
   configuration: conf_data,
   install: true,
-  install_dir: get_option('datadir') / 'glib-2.0/schemas'
+  install_dir: resource_data_dir / 'glib-2.0/schemas'
 )
 
 
@@ -67,7 +72,7 @@ message('Looking for dependencies')
 #   type: 'desktop',
 #   po_dir: '../po',
 #   install: true,
-#   install_dir: get_option('datadir') / 'applications'
+#   install_dir: resource_data_dir / 'applications'
 # )
 #
 # i18n.merge_file(
@@ -75,7 +80,7 @@ message('Looking for dependencies')
 #   output: app_id + '.appdata.xml',
 #   po_dir: '../po',
 #   install: true,
-#   install_dir: get_option('datadir') / 'appdata'
+#   install_dir: resource_data_dir / 'appdata'
 # )
 
 
@@ -110,7 +115,7 @@ foreach size: sizes
     install_data(
       source,
       rename: dest_name,
-      install_dir: get_option('datadir') / dest_dir
+      install_dir: resource_data_dir / dest_dir
     )
 
     # Documentation says assumption shouldn't be made about working directory
@@ -136,7 +141,7 @@ local_run_deps += custom_target('copy_icons',
 
 install_data('icons/gwe-symbolic.svg',
   rename: app_id + '-symbolic.svg',
-  install_dir: get_option('datadir') / 'icons/hicolor/symbolic/apps'
+  install_dir: resource_data_dir / 'icons/hicolor/symbolic/apps'
 )
 
 contributors = '\n'.join([
@@ -145,6 +150,11 @@ contributors = '\n'.join([
   'Gabriele Musco (gabmus) &lt;emaildigabry@gmail.com&gt;'
 ])
 
+if setuptools
+  gresources_install_dir = resource_data_dir
+else
+  gresources_install_dir = get_option('datadir') / meson.project_name()
+endif
 
 gwe_resources = gnome.compile_resources(app_id,
   gresource_file,
@@ -157,14 +167,14 @@ gwe_resources = gnome.compile_resources(app_id,
 
   gresource_bundle: true,
   install: true,
-  install_dir: get_option('datadir') / meson.project_name()
+  install_dir: gresources_install_dir
 )
 local_run_deps += gwe_resources
 
 install_data(
   'gwe.appdata.xml',
   rename: [app_id + '.appdata.xml'],
-  install_dir: get_option('datadir') / 'metainfo'
+  install_dir: gresources_install_dir / 'metainfo'
 )
 
 gnome.post_install(

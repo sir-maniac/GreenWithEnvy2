@@ -56,20 +56,17 @@ _UI_RESOURCE_PATH = APP_RESOURCE_PATH + "/ui/{}"
 
 # pylint: disable=no-self-use
 class ProviderModule(Module):
-    def __init__(self, bin_file: str, pkgdata_dir: str, icon_path: Optional[str]) -> None:
-        self.bin_file = bin_file
-        self.pkgdata_dir = pkgdata_dir
-        self.icon_path = icon_path
+    def __init__(self, sys_paths: SysPaths ) -> None:
+        self.sys_paths = sys_paths
 
     def configure(self, binder: Binder) -> None:
-        sys_paths = self._create_sys_paths()
-        db = self._create_database(sys_paths.get_config_path(APP_DB_NAME))
+        db = self._create_database(self.sys_paths.get_config_path(APP_DB_NAME))
         fan_subject = FanProfileChangedSubject(Subject())
         speed_step_subject = SpeedStepChangedSubject(Subject())
         overclock_profile_subject =  OverclockProfileChangedSubject(Subject())
         setting_subject =  SettingChangedSubject(Subject())
 
-        binder.bind(SysPaths, sys_paths)
+        binder.bind(SysPaths, self.sys_paths)
         binder.bind(SqliteDatabase, to=db)
         binder.bind(FanProfileChangedSubject, fan_subject)
         binder.bind(SpeedStepChangedSubject, speed_step_subject)
@@ -80,13 +77,14 @@ class ProviderModule(Module):
         # There might be a better place for this, but this seems a better place than the
         #  the top-level `gwe` file.
 
-        resource = Gio.Resource.load(os.path.join(sys_paths.pkgdata_dir, APP_RESOURCE_FILE_NAME))
+        resource = Gio.Resource.load((self.sys_paths.pkgdata_dir/APP_RESOURCE_FILE_NAME).as_posix())
         resource._register()
 
         icon_theme: Gtk.IconTheme = Gtk.IconTheme.get_default()
         icon_search_path = icon_theme.get_search_path()
-        if not sys_paths.icon_path in icon_search_path:
-            icon_theme.append_search_path(sys_paths.icon_path)
+        icon_path = self.sys_paths.icon_path.as_posix()
+        if not icon_path in icon_search_path:
+            icon_theme.append_search_path(icon_path)
 
         # peewee's model fundamentally clashes with injection, requiring
         #  configuration at the class level, rather than at instance
@@ -181,42 +179,3 @@ class ProviderModule(Module):
 
         return database
 
-    def _create_sys_paths(self) -> SysPaths:
-        assert isinstance(self.bin_file, str)
-        assert isinstance(self.pkgdata_dir, str)
-
-        pkgdata_dir = self.pkgdata_dir
-        icon_path = self.icon_path
-        config_path = str(Path(GLib.get_user_config_dir()) / APP_PACKAGE_NAME)
-
-        is_installed = True
-
-        editable: bool = 'GWE_RUN_LOCAL' in os.environ
-        builddir = os.environ.get('MESON_BUILD_ROOT')
-        if editable:
-            is_installed = False
-
-        elif builddir is not None:
-            # running in them meson build directory with 'run' or 'debug' target
-            is_installed = False
-            pkgdata_dir = os.path.join(builddir, 'data')
-            icon_path = os.path.join(builddir, 'data/icons')
-            os.environ['GSETTINGS_SCHEMA_DIR'] = pkgdata_dir
-
-        elif sys.prefix != sys.base_prefix:
-            # if installed in a virtual environment
-            env_path = Path(sys.prefix)
-            if (env_path / APP_PACKAGE_NAME / APP_RESOURCE_FILE_NAME).exists():
-                pkgdata_dir = str( env_path / APP_PACKAGE_NAME )
-                os.environ['GSETTINGS_SCHEMA_DIR'] = pkgdata_dir
-            if (env_path / f"icons/{TEST_ICON_PATH}").exists():
-                icon_path = str( env_path / 'icons')
-
-        if icon_path is None:
-            icon_path = DEFAULT_ICON_PATH
-
-        return SysPaths(is_installed=is_installed,
-                        bin_file=self.bin_file,
-                        pkgdata_dir=pkgdata_dir,
-                        icon_path=icon_path,
-                        config_path=config_path)

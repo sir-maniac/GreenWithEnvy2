@@ -22,13 +22,17 @@ from pathlib import Path
 class SysPaths:
     is_installed: bool
     """ If program is running in an installed location, rather than in the source tree  """
-    bin_file: str
+    has_pkg_resources: bool
+    """ If true the resources are in <pkg-dir>/data """
+    entry_point_file: Path
     """ Absolute path of the file to run this program """
-    pkgdata_dir: str
-    """ Location of the program data (i.e. /usr/share/<app_name>)"""
-    icon_path: str
+    pkgdata_dir: Path
+    """ Location of the gresource file """
+    data_dir: Path
+    """ location of various data subdirs (i.e. /usr/share ) """
+    icon_path: Path
     """ Path to append to icon search path (i.e. /usr/share/icons ) """
-    config_path: str
+    config_path: Path
     """
         Path of user-level configuration such as:
         - $XDG_CONFIG_HOME/<app_name>
@@ -37,4 +41,4 @@ class SysPaths:
     """
 
     def get_config_path(self, file: str) -> str:
-        return str( Path(self.config_path).joinpath(file) )
+        return str( self.config_path.joinpath(file) )

@@ -25,15 +25,16 @@ import sys
 source_root = Path(__file__).parent.parent
 
 PKGDATA_DIR = source_root / 'build/meson/data'
+DATA_DIR = source_root / 'build/meson/data'
 ICON_PATH = source_root / 'build/meson/data/icons'
 #localedir = source_root / 'build/meson/share/locale'
 os.environ['GWE_RUN_LOCAL'] = "1"
 
-sys.path.insert(1, source_root)
+sys.path.insert(1, source_root.as_posix())
 
-signal.signal(signal.SIGINT, signal.SIG_DFL)
-# gettext.install('trg', localedir)
 
 if __name__ == '__main__':
     from gwe import __main__
-    __main__.main(PKGDATA_DIR.as_posix(), ICON_PATH.as_posix())
+    __main__.main(pkgdata_dir=PKGDATA_DIR.as_posix(),
+                  data_dir=DATA_DIR.as_posix(),
+                  icon_path=ICON_PATH.as_posix())

@@ -60,6 +60,12 @@ Homepage = "https://github.com/sir-maniac/GreenWithEnvy2"
 Repository = "https://github.com/sir-maniac/GreenWithEnvy2.git"
 Bug-Tracker = "https://github.com/sir-maniac/GreenWithEnvy2"
 
+[project.scripts]
+gwe2 = "gwe.__main__:main_pkg_resources"
+
+[tool.meson-python.args]
+setup = [ '-Dsetuptools=true' ]
+
 [tool.setuptools]
 packages = ["gwe"]
 

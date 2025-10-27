@@ -45,7 +45,7 @@ class DesktopEntry():
 
             desktop_parser.set(DESKTOP_ENTRY_ICON, APP_ICON_NAME)
 
-        desktop_parser.set(DESKTOP_ENTRY_EXEC, f'{self._sys_paths.bin_file} --hide-window --delay')
+        desktop_parser.set(DESKTOP_ENTRY_EXEC, f'{self._sys_paths.entry_point_file.as_posix()} --hide-window --delay')
         desktop_parser.set(AUTOSTART_FLAG, str(is_enabled).lower())
         desktop_parser.write()
 
@@ -57,5 +57,5 @@ class DesktopEntry():
             desktop_parser.set(k, v)
 
         desktop_parser.set(DESKTOP_ENTRY_ICON, APP_ICON_NAME)
-        desktop_parser.set(DESKTOP_ENTRY_EXEC, self._sys_paths.bin_file)
+        desktop_parser.set(DESKTOP_ENTRY_EXEC, self._sys_paths.entry_point_file.as_posix())
         desktop_parser.write()

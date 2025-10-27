@@ -17,13 +17,14 @@
 # You should have received a copy of the GNU General Public License
 # along with gwe.  If not, see <http://www.gnu.org/licenses/>.
 import os
+from pathlib import Path
 import signal
 import locale
 import gettext
 import logging
 import sys
 from types import TracebackType
-from typing import Optional, Type
+from typing import NoReturn, Optional, Type
 from os.path import abspath, join, dirname
 
 from injector import Injector, inject
@@ -31,13 +32,15 @@ from peewee import SqliteDatabase
 from reactivex.disposable import CompositeDisposable
 
 import gi
+
+from gwe.model.sys_paths import SysPaths
 gi.require_version('Gtk', '3.0')
 gi.require_version('Gdk', '3.0')
 gi.require_version('Notify', '0.7')
 from gi.repository import GLib
 
 from gwe import di
-from gwe.conf import APP_PACKAGE_NAME
+from gwe.conf import APP_PACKAGE_NAME, APP_RESOURCE_FILE_NAME, DEFAULT_ICON_PATH, TEST_ICON_PATH
 from gwe.model.current_fan_profile import CurrentFanProfile
 from gwe.model.current_overclock_profile import CurrentOverclockProfile
 from gwe.model.fan_profile import FanProfile
@@ -110,22 +113,84 @@ class GweLifetime:
             Setting
         ])
 
-def _get_bin_file() -> str:
+def _get_entry_point() -> str:
     argv0 = sys.argv[0]
     if len(argv0) != 0 and argv0 != '-c':
         return os.path.abspath(sys.argv[0])
     else:
-        raise ValueError("Could not determine binary file path")
+        raise RuntimeError("Could not determine the entry point script")
 
-def main(pkgdata_dir: str, icon_path: Optional[str] = None) -> int:
+def _create_sys_paths(pkgdata_dir: str, data_dir: str, icon_path: Optional[str], has_pkg_resources: bool) -> SysPaths:
+    assert isinstance(pkgdata_dir, str)
+
+    config_path = Path(GLib.get_user_config_dir()) / APP_PACKAGE_NAME
+
+    is_installed = True
+
+    run_local: bool = 'GWE_RUN_LOCAL' in os.environ
+    builddir = os.environ.get('MESON_BUILD_ROOT')
+    if run_local:
+        is_installed = False
+    elif builddir is not None:
+        # running in them meson build directory with 'run' or 'debug' target
+        is_installed = False
+        pkgdata_dir = (Path(builddir)/'data').as_posix()
+        data_dir = pkgdata_dir
+        icon_path = (Path(builddir)/'data/icons').as_posix()
+        os.environ['GSETTINGS_SCHEMA_DIR'] = data_dir
+
+    if icon_path is None:
+        icon_path = DEFAULT_ICON_PATH
+
+    return SysPaths(is_installed=is_installed,
+                    has_pkg_resources=has_pkg_resources,
+                    entry_point_file=Path(_get_entry_point()),
+                    pkgdata_dir=Path(pkgdata_dir),
+                    data_dir=Path(data_dir),
+                    icon_path=Path(icon_path),
+                    config_path=config_path)
+
+
+def main(pkgdata_dir: str,
+         data_dir: str,
+         icon_path: Optional[str] = None,
+         has_pkg_resources: bool=False) -> NoReturn:
+    """Main function for this program
+
+    Args:
+        pkgdata_dir (str): program specific data directory ( i.e. /usr/share/gwe2 )
+        data_dir (str): non-program specific data directory ( i.e. /usr/share )
+        icon_path (Optional[str], optional): _description_. Defaults to None.
+        has_pkg_resources (bool, optional): _description_. Defaults to False.
+
+    Returns:
+        NoReturn: Doesn't return, calls sys.exit()
+    """
     _LOG.debug("main")
 
-    injector = Injector(ProviderModule(_get_bin_file(), pkgdata_dir, icon_path))
+    sys_paths = _create_sys_paths(pkgdata_dir=pkgdata_dir,
+                                  data_dir=data_dir,
+                                  icon_path=icon_path,
+                                  has_pkg_resources=has_pkg_resources)
+    injector = Injector(ProviderModule(sys_paths))
 
     lifetime = injector.get(GweLifetime)
     application: Application = injector.get(Application)
     GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGINT, application.quit)
     exit_status = application.run(sys.argv)
     lifetime.cleanup()
-    return sys.exit(exit_status)
+    sys.exit(exit_status)
 
+def main_pkg_resources() -> NoReturn:
+    """ Main function when resources are installed in <pkg_name>/data """
+    pkg_root = Path(__file__).parent
+    pkgdata_dir = pkg_root/'data'
+    data_dir = pkg_root/'data'
+    icon_path = pkg_root/'icons'
+    assert pkgdata_dir.is_dir(), f"Could not find resources in '{pkg_root.name}/data'"
+    if not icon_path.is_dir():
+        icon_path = Path(DEFAULT_ICON_PATH)
+    main(pkgdata_dir=pkgdata_dir.as_posix(),
+         data_dir=data_dir.as_posix(),
+         icon_path=icon_path.as_posix(),
+         has_pkg_resources=True)
