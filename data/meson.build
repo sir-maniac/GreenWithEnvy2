@@ -97,8 +97,6 @@ gwe_resources = gnome.compile_resources(app_id,
   install_dir: get_option('datadir') / meson.project_name()
 )
 
-gwe_settings = gnome.compile_schemas()
-
 install_data(
   app_id + '.appdata.xml',
   install_dir: get_option('datadir') / 'metainfo'
